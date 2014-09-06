@@ -1,3 +1,12 @@
 [submodule "jquery"]
 	path = jquery
 	url = https://github.com/jquery/jquery.git
+[submodule "jquery-ui"]
+	path = jquery-ui
+	url = https://github.com/jquery/jquery-ui.git
+[submodule "jqTree"]
+	path = jqTree
+	url = https://github.com/mbraak/jqTree.git
+[submodule "tinymce"]
+	path = tinymce
+	url = https://github.com/tinymce/tinymce.git

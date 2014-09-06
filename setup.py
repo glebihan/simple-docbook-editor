@@ -49,12 +49,32 @@ package_dir = {}
 for i in packages:
     package_dir[i] = i.replace(".", "/")
 
+# build tinymce
+os.chdir("tinymce")
+os.system("npm install")
+os.system("jake")
+os.chdir("..")
+os.system("cp -R tinymce/js/tinymce share/simple-docbook-editor")
+os.system("cp -R tinymce/LICENSE.TXT share/simple-docbook-editor/tinymce")
+
 # build jquery
 os.chdir("jquery")
 os.system("npm run build")
 os.chdir("..")
 os.system("mkdir -p share/simple-docbook-editor/jquery")
 os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
+
+# build jquery-ui
+os.chdir("jquery-ui")
+os.system("npm install")
+os.system("grunt concat")
+os.chdir("..")
+os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
+os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
+
+# package jqTree
+os.system("mkdir -p share/simple-docbook-editor/jqTree")
+os.system("cp -R jqTree/tree.jquery.js jqTree/LICENSE share/simple-docbook-editor/jqTree")
 
 setup(
     name = UNIX_APPNAME,
