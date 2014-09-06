@@ -1,0 +1,10 @@
+#! /usr/bin/python
+# -*- coding=utf-8 -*-
+
+from SimpleDocbookEditor.main import SimpleDocbookEditor
+import gettext
+
+gettext.install("simple-docbook-editor", "/usr/share/locale")
+
+if __name__ == "__main__":
+    SimpleDocbookEditor().run()

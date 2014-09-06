@@ -1,0 +1,77 @@
+body{
+    font-family: Helvetica, Arial, sans-serif;
+    color: #1D1D1D;
+    background-color: #EAEDEF;
+}
+
+#leftbar{
+    background-color: #383838;
+    width: 200px;
+    border: #B3B3B3 solid 1px;
+    position: absolute;
+    bottom: 0px;
+    top: 0px;
+    left: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #FFFFFF;
+}
+
+#doc_structure{
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+}
+
+#doc_structure > a{
+    display: block;
+    height: 60px;
+    margin-top: -1px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 12px;
+    color: #1D1D1D;
+    text-decoration: none;
+    border-bottom: #B3B3B3 solid 1px;
+}
+
+#doc_structure > a.edited{
+    background-color: #ECF0F3;
+}
+
+#doc_structure > a:hover{
+    background-color: #D1D4D7;
+}
+
+#doc_structure > a span.title{
+    font-weight: bold;
+    display: block;
+    font-size: 15px;
+}
+
+#editor_wrapper{
+    background-color: #EAEDEF;
+    border: #B3B3B3 solid 1px;
+    position: absolute;
+    bottom: 0px;
+    top: 0px;
+    left: 200px;
+    right: 1px;
+    padding: 10px;
+}
+
+#editor_inside_wrapper{
+    height: 100%;
+}
+
+#editor_inside_inside_wrapper{
+    border-radius: 3px;
+    border: #B3B3B3 solid 1px;
+    background-color: #FFFFFF;
+}
+
+#editor{
+    padding: 10px;
+}
