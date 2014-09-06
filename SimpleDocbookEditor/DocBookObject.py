@@ -158,7 +158,7 @@ class DocBookObject(object):
         if self.filename:
             return self.filename
         else:
-            return self._parent.filename
+            return self._parent.get_real_filename()
     
     def _load_from_file(self):
         logging.debug("Parsing file %s" % self.filename)
