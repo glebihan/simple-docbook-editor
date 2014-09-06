@@ -211,7 +211,12 @@ class DocBookObject(object):
     
     def get_structure_tree(self):
         title = self.title
-        res = {"id": self.object_id, "element_type": self.element_type, "edit_mode": self.edit_mode, "children": [], "label": (self.element_type, title)[title != None]}
+        if title == None:
+            if self.filename:
+                title = os.path.split(self.filename)[1]
+            else:
+                title = self.element_type
+        res = {"id": self.object_id, "element_type": self.element_type, "edit_mode": self.edit_mode, "children": [], "label": title}
         for i in self._children:
             if i.is_structure():
                 res["children"].append(i.get_structure_tree())
