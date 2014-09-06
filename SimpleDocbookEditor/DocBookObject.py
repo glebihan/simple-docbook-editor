@@ -402,8 +402,7 @@ class DocBookObject(object):
         self._xml_root.replaceNode(self._html_to_docbook(html_doc.getRootElement()))
     
     def save(self):
-        dest_filename = ".".join(self.filename.split(".")[:-1]) + ".modified.xml"
-        self._xml_document.saveFormatFileEnc(dest_filename, "utf-8", True)
+        self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)
         for i in self._children:
             if i.filename:
                 i.save()
