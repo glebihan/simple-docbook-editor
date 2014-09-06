@@ -1,5 +1,7 @@
 var doc_structure_closed_nodes = new Array();
 var selected_doc_section = null;
+var edited_section_id = 0;
+var saveTimeout = null;
 
 function reload_doc_structure()
 {
@@ -23,11 +25,18 @@ function set_doc_structure(doc_structure)
 
 function load_doc_section(section_id)
 {
+    if (saveTimeout)
+    {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
+    }
     alert("load_doc_section:" + section_id);
 }
 
 function set_edit_data(edit_data)
 {
+    edited_section_id = edit_data.section_id;
+    selected_doc_section = edit_data.section_id;
     tinymce.get("tinymcecontainer").setContent(edit_data.html);
     update_editor_height();
 }
@@ -41,7 +50,24 @@ function refresh_view_for_new_book(section_id)
     tinymce.get("tinymcecontainer").setContent("");
     doc_structure_closed_nodes = new Array();
     selected_doc_section = section_id;
+    edited_section_id = 0;
     reload_doc_structure();
+}
+
+
+function save_editor_contents()
+{
+    if (saveTimeout)
+    {
+        clearTimeout(saveTimeout);
+    }
+    saveTimeout = setTimeout(function()
+    {
+        if (edited_section_id)
+        {
+            alert('set_section_contents:' + edited_section_id + ':' + tinymce.get("tinymcecontainer").getContent());
+        }
+    }, 300);
 }
 
 jQuery(document).ready(function()
@@ -56,8 +82,11 @@ jQuery(document).ready(function()
         }
     });
     jQuery("#doc_structure").bind('tree.select', function(event){
-        selected_doc_section = event.node.id;
-        load_doc_section(event.node.id);
+        if (event.node.id != edited_section_id)
+        {
+            selected_doc_section = event.node.id;
+            load_doc_section(event.node.id);
+        }
     });
     jQuery("#doc_structure").bind('tree.open', function(event){
         var i = doc_structure_closed_nodes.indexOf(event.node.id);
@@ -81,13 +110,16 @@ jQuery(document).ready(function()
         selector: "#tinymcecontainer",
         setup: function(editor){
             editor.on('change', function(e){
-                //alert('set_note_contents:' + editing_note_local_id + ':' + editor.getContent());
+                save_editor_contents();
             });
             editor.on('init', function(e){
+                tinymce.get("tinymcecontainer").getBody().onkeyup = function(event)
+                {
+                    save_editor_contents();
+                }
                 setTimeout(function(){
                     update_editor_height();
                     alert("editor_ready");
-                    //~ load_doc_section(40);
                 }, 100);
             });
         },

@@ -123,6 +123,8 @@ HTML_TO_DOCBOOK_PROPS = {
     "src": "fileref"
 }
 
+libxml2.registerErrorHandler(lambda f, ctx: None, None)
+
 class DocBookObject(object):
     def __init__(self, parent = None, **params):
         global OBJECT_IDS
@@ -399,7 +401,10 @@ class DocBookObject(object):
         assert (self.edit_mode == "html")
         
         html_doc = libxml2.htmlParseDoc(html, "utf-8")
-        self._xml_root.replaceNode(self._html_to_docbook(html_doc.getRootElement()))
+        new_xml_node = self._html_to_docbook(html_doc.getRootElement())
+        self._xml_root.addNextSibling(new_xml_node)
+        self._xml_root.unlinkNode()
+        self._load_from_xml_object(new_xml_node)
     
     def save(self):
         self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)

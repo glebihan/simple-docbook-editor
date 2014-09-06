@@ -59,6 +59,7 @@ class MainWindow(object):
         self._window.connect("delete_event", self._on_window_delete_event)
         builder.get_object("quit_menu_item").connect("activate", self._on_quit_clicked)
         builder.get_object("open_book_menuitem").connect("activate", self._on_open_book_clicked)
+        builder.get_object("save_book_menuitem").connect("activate", self._on_save_book_clicked)
         builder.get_object("about_menuitem").connect("activate", self._on_about_clicked)
         
         self._open_book_dialog = OpenBookDialog(self._application, self._window)
@@ -82,6 +83,9 @@ class MainWindow(object):
         if filename:
             self._application.load_book(filename)
     
+    def _on_save_book_clicked(self, menuitem):
+        self._application.book.save()
+    
     def show_all(self):
         self._window.show_all()
     
@@ -95,7 +99,7 @@ class MainWindow(object):
             self._webview_pending_commands.append(command)
     
     def _on_webview_script_alert(self, editor, frame, message):
-        logging.debug("_on_webview_script_alert:%s" % message)
+        logging.debug("_on_webview_script_alert:%s" % ":".join(message.split(":")[:2]))
         
         if ":" in message:
             i = message.index(":")
@@ -118,7 +122,14 @@ class MainWindow(object):
             section_id = int(params)
             section = self._application.book.find_section_by_id(section_id)
             if section.edit_mode == "html":
-                self.send_command("set_edit_data(%s)" % json.dumps({"edit_mode": "html", "html": str(section.get_html())}))
+                self.send_command("set_edit_data(%s)" % json.dumps({"section_id": section_id, "edit_mode": "html", "html": str(section.get_html())}))
+        elif command == "set_section_contents":
+            i = params.index(":")
+            section_id = int(params[:i])
+            contents = params[i+1:]
+            section = self._application.book.find_section_by_id(section_id)
+            section.update_from_html(contents)
+            self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
         else:
             return False
             
