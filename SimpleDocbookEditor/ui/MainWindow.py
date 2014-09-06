@@ -1,4 +1,5 @@
 # MainWindow.py
+# -*- coding=utf-8 -*-
 # -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4; coding: utf-8 -*-
 #
 # Copyright © 2014 Gwendal Le Bihan
