@@ -210,6 +210,8 @@ class DocBookObject(object):
     def _docbook_to_html_node(self, xml_node):
         if xml_node.name == "text":
             return xml_node.copyNode(False)
+        elif xml_node.type == "entity_ref":
+            return libxml2.newText(str(xml_node))
         elif xml_node.name in DOCBOOK_TO_HTML_NODES:
             res = self._docbook_to_html(xml_node)
             #~ if xml_node.name == "figure":
