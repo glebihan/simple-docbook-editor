@@ -10,4 +10,6 @@ Work in progress
 Installation
 ============
 
+```bash
 sudo python setup.py install
+```
