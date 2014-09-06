@@ -21,7 +21,7 @@ DOCBOOK_TO_HTML_NODES = {
     "sect2": "div",
     "sect3": "div",
     "note": "div",
-    "figure": "div",
+    "figure": "figure",
     "screenshot": "div",
     "imageobject": "div",
     "mediaobject": "div",
@@ -65,7 +65,6 @@ DOCBOOK_ELEMENT_TYPE_TO_CLASS = [
     "guimenuitem",
     "keycombo",
     "keycap",
-    "figure",
     "screenshot",
     "mediaobject",
     "imageobject",
@@ -136,12 +135,27 @@ class DocBookObject(object):
         return self._xml_root.name
     element_type = property(_get_element_type)
     
+    def _find_nodes(self, root, elname = None, maxdepth = -1, **params):
+        res = []
+        if elname == None or root.name == elname:
+            add = True
+            for i in params:
+                if root.prop(i) != params[i]:
+                    add = False
+                    break
+            if add:
+                res.append(root)
+        if maxdepth != 0:
+            child = root.children
+            while child:
+                res += self._find_nodes(child, elname, maxdepth - 1, **params)
+                child = child.next
+        return res
+    
     def _get_title(self):
-        child = self._xml_root.children
-        while child:
-            if child.name == "title":
-                return child.getContent()
-            child = child.next
+        nodes = self._find_nodes(self._xml_root, "title", 1)
+        if len(nodes) == 1:
+            return nodes[0].getContent()
     title = property(_get_title)
     
     def is_structure(self):
@@ -198,6 +212,12 @@ class DocBookObject(object):
             return xml_node.copyNode(False)
         elif xml_node.name in DOCBOOK_TO_HTML_NODES:
             res = self._docbook_to_html(xml_node)
+            #~ if xml_node.name == "figure":
+                #~ title_nodes = self._find_nodes(xml_node, "title", 1)
+                #~ if len(title_nodes) == 1:
+                    #~ img_nodes = self._find_nodes(res, "img")
+                    #~ if len(img_nodes) == 1:
+                        #~ img_nodes[0].setProp("alt", title_nodes[0].getContent())
             self._docbook_to_html_process_properties(xml_node, res)
             return res
         elif xml_node.name in DOCBOOK_JUMP_NODES:
@@ -216,7 +236,10 @@ class DocBookObject(object):
             return None
     
     def _docbook_to_html(self, xml_node):
-        html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
+        if xml_node.name == "title" and xml_node.parent.name == "figure":
+            html_node = libxml2.newNode("figcaption")
+        else:
+            html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             html_node.newProp("class", xml_node.name)
         child = xml_node.children
