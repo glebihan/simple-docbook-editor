@@ -27,6 +27,7 @@ import urllib
 import json
 import logging
 from OpenBookDialog import OpenBookDialog
+from AboutDialog import AboutDialog
 from ..informations import *
 
 class MainWindow(object):
@@ -58,8 +59,10 @@ class MainWindow(object):
         self._window.connect("delete_event", self._on_window_delete_event)
         builder.get_object("quit_menu_item").connect("activate", self._on_quit_clicked)
         builder.get_object("open_book_menuitem").connect("activate", self._on_open_book_clicked)
+        builder.get_object("about_menuitem").connect("activate", self._on_about_clicked)
         
         self._open_book_dialog = OpenBookDialog(self._application, self._window)
+        self._about_dialog = AboutDialog(self._window)
     
     def _check_quit(self):
         gtk.main_quit()
@@ -68,6 +71,9 @@ class MainWindow(object):
     def _on_window_delete_event(self, window, event):
         return self._check_quit()
     
+    def _on_about_clicked(self, menuitem):
+        self._about_dialog.run()
+        
     def _on_quit_clicked(self, menuitem):
         self._check_quit()
     
