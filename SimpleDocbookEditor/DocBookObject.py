@@ -23,6 +23,7 @@ import libxml2
 import os
 import logging
 import urlparse
+import hashlib
 
 OBJECT_IDS = 0
 
@@ -131,6 +132,8 @@ class DocBookObject(object):
         
         self._parent = parent
         self._params = params
+        
+        self._saved_state = None
         
         self._already_warned_unconverted_docbook_node_type = []
         self._already_warned_unconverted_html_node_type = []
@@ -416,3 +419,21 @@ class DocBookObject(object):
         for i in self._children:
             if i.filename:
                 i.save()
+        self.store_saved_state()
+    
+    def _get_content_hash(self):
+        md5 = hashlib.md5()
+        md5.update(str(self._xml_root))
+        hashsum = md5.digest()
+        for i in self._children:
+            if i.filename:
+                hashsum += i.content_hash
+        return hashsum
+    content_hash = property(_get_content_hash)
+    
+    def store_saved_state(self):
+        self._saved_state = self.content_hash
+    
+    def _get_changed(self):
+        return self.content_hash != self._saved_state
+    changed = property(_get_changed)

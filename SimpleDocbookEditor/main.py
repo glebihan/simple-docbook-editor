@@ -55,6 +55,7 @@ class SimpleDocbookEditor(object):
     
     def load_book(self, filename, section_id = 0):
         self.book = DocBookObject(filename = filename)
+        self.book.store_saved_state()
         self._window.refresh_view_for_new_book(section_id)
     
     def run(self):

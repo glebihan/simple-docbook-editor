@@ -28,6 +28,7 @@ import json
 import logging
 from OpenBookDialog import OpenBookDialog
 from AboutDialog import AboutDialog
+from SaveQuitDialog import SaveQuitDialog
 from ..informations import *
 
 class MainWindow(object):
@@ -64,8 +65,15 @@ class MainWindow(object):
         
         self._open_book_dialog = OpenBookDialog(self._application, self._window)
         self._about_dialog = AboutDialog(self._window)
+        self._save_quit_dialog = SaveQuitDialog(self._window)
     
     def _check_quit(self):
+        if self._application.book and self._application.book.changed:
+            resp = self._save_quit_dialog.run()
+            if resp == gtk.RESPONSE_YES:
+                self._application.book.save()
+            elif resp != gtk.RESPONSE_NO:
+                return True
         gtk.main_quit()
         return False
     
