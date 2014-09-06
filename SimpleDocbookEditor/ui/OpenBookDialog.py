@@ -24,6 +24,10 @@ import gtk
 class OpenBookDialog(gtk.FileChooserDialog):
     def __init__(self, application, window):
         gtk.FileChooserDialog.__init__(self, parent = window, buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        file_filter = gtk.FileFilter()
+        file_filter.add_mime_type("text/xml")
+        file_filter.set_name(_("XML Files"))
+        self.add_filter(file_filter)
     
     def run(self):
         self.show_all()

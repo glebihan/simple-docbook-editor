@@ -97,6 +97,31 @@ DOCBOOK_TO_HTML_PROPS = {
     "id": "id",
     "width": "width"
 }
+HTML_TO_DOCBOOK_NODES = {
+    "p": "para",
+    "h1": "title",
+    "ul": "itemizedlist",
+    "li": "listitem",
+    "table": "table",
+    "thead": "thead",
+    "tbody": "tbody",
+    "tr": "row",
+    "td": "entry",
+    "a": "ulink",
+    "figure": "figure",
+    "figcaption": "title",
+    "img": "imagedata"
+}
+HTML_JUMP_NODES = [
+    "body",
+    "html"
+]
+HTML_TO_DOCBOOK_PROPS = {
+    "id": "id",
+    "href": "url",
+    "width": "width",
+    "src": "fileref"
+}
 
 class DocBookObject(object):
     def __init__(self, parent = None, **params):
@@ -106,7 +131,9 @@ class DocBookObject(object):
         self._params = params
         
         self._already_warned_unconverted_docbook_node_type = []
+        self._already_warned_unconverted_html_node_type = []
         self._already_warned_unconverted_docbook_prop = []
+        self._already_warned_unconverted_html_prop = []
         
         OBJECT_IDS += 1
         self.object_id = OBJECT_IDS
@@ -209,10 +236,20 @@ class DocBookObject(object):
             self._already_warned_unconverted_docbook_node_type.append(node_type)
             logging.warn("Unconverted docbook node type : %s" % node_type)
     
+    def _warn_unconverted_html_node_type(self, node_type):
+        if not node_type in self._already_warned_unconverted_html_node_type:
+            self._already_warned_unconverted_html_node_type.append(node_type)
+            logging.warn("Unconverted HTML node type : %s" % node_type)
+    
     def _warn_unconverted_docbook_prop(self, prop_name):
         if not prop_name in self._already_warned_unconverted_docbook_prop:
             self._already_warned_unconverted_docbook_prop.append(prop_name)
             logging.warn("Unconverted docbook property : %s" % prop_name)
+ 
+    def _warn_unconverted_html_prop(self, prop_name):
+        if not prop_name in self._already_warned_unconverted_html_prop:
+            self._already_warned_unconverted_html_prop.append(prop_name)
+            logging.warn("Unconverted HTML property : %s" % prop_name)
     
     def _docbook_to_html_process_properties(self, xml_node, html_node):
         prop = xml_node.get_properties()
@@ -261,6 +298,7 @@ class DocBookObject(object):
             html_node = libxml2.newNode("figcaption")
         else:
             html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
+        self._docbook_to_html_process_properties(xml_node, html_node)
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             html_node.newProp("class", xml_node.name)
         child = xml_node.children
@@ -274,7 +312,98 @@ class DocBookObject(object):
             child = child.next
         return html_node
     
+    def _html_to_docbook_node(self, html_node):
+        if html_node.name == "text":
+            return html_node.copyNode(False)
+        #~ elif html_node.type == "entity_ref":
+            #~ return libxml2.newText(str(html_node))
+        elif html_node.name in ["div", "span"] and html_node.prop("class") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
+            res = self._html_to_docbook(html_node)
+            self._html_to_docbook_process_properties(html_node, res)
+            return res
+        elif html_node.name in HTML_TO_DOCBOOK_NODES:
+            res = self._html_to_docbook(html_node)
+            self._html_to_docbook_process_properties(html_node, res)
+            return res
+        elif html_node.name in HTML_JUMP_NODES:
+            res = []
+            subchild = html_node.children
+            while subchild:
+                xml_child = self._html_to_docbook_node(subchild)
+                if type(xml_child) == list:
+                    res += xml_child
+                elif xml_child != None:
+                    res.append(xml_child)
+                subchild = subchild.next
+            return res
+        else:
+            self._warn_unconverted_html_node_type(html_node.name)
+            return None
+    
+    def _html_to_docbook(self, html_node):
+        if html_node.name == "html":
+            return self._html_to_docbook_node(html_node)[0]
+        elif html_node.name in ["div", "span"] and html_node.prop("class") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
+            xml_node = libxml2.newNode(html_node.prop("class"))
+        else:
+            xml_node = libxml2.newNode(HTML_TO_DOCBOOK_NODES[html_node.name])
+        self._html_to_docbook_process_properties(html_node, xml_node)
+        if html_node.name == "table":
+            sub_xml_node = libxml2.newNode("tgroup")
+            sub_xml_node.setProp("colsep", "1")
+            sub_xml_node.setProp("rowsep", "1")
+            sub_xml_node.setProp("align", "left")
+            trs = self._find_nodes(html_node, "tr")
+            if len(trs) > 0:
+                sub_xml_node.setProp("cols", str(len(self._find_nodes(trs[0], "td"))))
+            xml_node.addChild(sub_xml_node)
+        else:
+            sub_xml_node = None
+        child = html_node.children
+        while child:
+            xml_child = self._html_to_docbook_node(child)
+            if type(xml_child) == list:
+                for i in xml_child:
+                    if sub_xml_node:
+                        sub_xml_node.addChild(i)
+                    else:
+                        xml_node.addChild(i)
+            elif xml_child != None:
+                if sub_xml_node:
+                    sub_xml_node.addChild(xml_child)
+                else:
+                    xml_node.addChild(xml_child)
+            child = child.next
+        return xml_node
+    
+    def _html_to_docbook_process_properties(self, html_node, xml_node):
+        prop = html_node.get_properties()
+        while prop:
+            if prop.name in HTML_TO_DOCBOOK_PROPS:
+                prop_value = html_node.prop(prop.name)
+                if prop.name == "src":
+                    real_filename_uri = os.path.split(urlparse.urljoin('file:', self.get_real_filename()))[0] + "/"
+                    if prop_value.startswith(real_filename_uri):
+                        prop_value = prop_value[len(real_filename_uri):]
+                xml_node.setProp(HTML_TO_DOCBOOK_PROPS[prop.name], prop_value)
+            else:
+                self._warn_unconverted_html_prop(prop.name)
+            prop = prop.next
+    
     def get_html(self):
         assert (self.edit_mode == "html")
         
         return self._docbook_to_html(self._xml_root)
+    
+    def update_from_html(self, html):
+        assert (self.edit_mode == "html")
+        
+        html_doc = libxml2.htmlParseDoc(html, "utf-8")
+        self._xml_root.replaceNode(self._html_to_docbook(html_doc.getRootElement()))
+    
+    def save(self):
+        dest_filename = ".".join(self.filename.split(".")[:-1]) + ".modified.xml"
+        self._xml_document.saveFormatFileEnc(dest_filename, "utf-8", True)
+        for i in self._children:
+            if i.filename:
+                i.save()
