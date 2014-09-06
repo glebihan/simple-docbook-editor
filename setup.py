@@ -54,7 +54,7 @@ os.chdir("jquery")
 os.system("npm run build")
 os.chdir("..")
 os.system("mkdir -p share/simple-docbook-editor/jquery")
-os.system("cp jquery/dist/jquery.min.js jquery/MIT-LICENSE.txt share/simple-docbook-editor/jquery")
+os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
 
 setup(
     name = UNIX_APPNAME,
