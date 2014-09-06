@@ -6,7 +6,7 @@ body{
 
 #leftbar{
     background-color: #383838;
-    width: 200px;
+    width: 250px;
     border: #B3B3B3 solid 1px;
     position: absolute;
     bottom: 0px;
@@ -57,7 +57,7 @@ body{
     position: absolute;
     bottom: 0px;
     top: 0px;
-    left: 200px;
+    left: 270px;
     right: 1px;
     padding: 10px;
 }
