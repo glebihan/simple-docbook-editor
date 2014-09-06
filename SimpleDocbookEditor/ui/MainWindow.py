@@ -8,17 +8,18 @@ import urllib
 import json
 import logging
 from OpenBookDialog import OpenBookDialog
+from ..informations import *
 
 class MainWindow(object):
     def __init__(self, application):
         self._application = application
         
         builder = gtk.Builder()
-        builder.add_from_file(os.path.join(self._application.cli_options.share_dir, "simple-docbook-editor", "ui", "ui.glade"))
+        builder.add_from_file(os.path.join(self._application.cli_options.share_dir, UNIX_APPNAME, "ui", "ui.glade"))
         self._window = builder.get_object("main_window")
         self._window.add_accel_group(builder.get_object("main_accelgroup"))
         
-        self._window.set_title(_("Simple DocBook Editor"))
+        self._window.set_title(_(APPNAME))
         
         self._window.set_size_request(640, 480)
         self._window.maximize()
@@ -99,7 +100,7 @@ class MainWindow(object):
         return True
     
     def _load_main_window(self):
-        filename = os.path.join(self._application.cli_options.share_dir, "simple-docbook-editor", "ui", "main_window.html")
+        filename = os.path.join(self._application.cli_options.share_dir, UNIX_APPNAME, "ui", "main_window.html")
         f = open(filename)
         data = f.read()
         f.close()
