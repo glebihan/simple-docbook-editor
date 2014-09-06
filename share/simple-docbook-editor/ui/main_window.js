@@ -10,7 +10,7 @@ function set_doc_structure(doc_structure)
 {
     jQuery("#doc_structure").tree("loadData", [doc_structure]);
     if (selected_doc_section){
-        node = jQuery("#doc_structure").tree("getNodeById", selected_doc_section.id);
+        node = jQuery("#doc_structure").tree("getNodeById", selected_doc_section);
         jQuery("#doc_structure").tree('selectNode', node);
     }
     for (var i in doc_structure_closed_nodes){
@@ -36,11 +36,11 @@ function update_editor_height(){
     jQuery("#tinymcecontainer_ifr").css("height", (jQuery("#editor_inside_wrapper").height() - jQuery("#tinymcecontainer_ifr").offset().top) + "px");
 }
 
-function refresh_view_for_new_book()
+function refresh_view_for_new_book(section_id)
 {
     tinymce.get("tinymcecontainer").setContent("");
     doc_structure_closed_nodes = new Array();
-    selected_doc_section = null;
+    selected_doc_section = section_id;
     reload_doc_structure();
 }
 
@@ -56,7 +56,7 @@ jQuery(document).ready(function()
         }
     });
     jQuery("#doc_structure").bind('tree.select', function(event){
-        selected_doc_section = event.node;
+        selected_doc_section = event.node.id;
         load_doc_section(event.node.id);
     });
     jQuery("#doc_structure").bind('tree.open', function(event){
@@ -68,6 +68,13 @@ jQuery(document).ready(function()
     });
     jQuery("#doc_structure").bind('tree.close', function(event){
         doc_structure_closed_nodes.push(event.node.id);
+    });
+    
+    jQuery("#leftbar").resizable({
+        handles: "e",
+        resize: function(event, ui){
+            jQuery("#editor_wrapper").css("left", jQuery("#leftbar").outerWidth());
+        }
     });
     
     tinymce.init({
@@ -86,12 +93,12 @@ jQuery(document).ready(function()
         },
         menubar: false,
         statusbar: false,
-        toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript"
+        plugins: ["code image"],
+        toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | code",
+        relative_urls: false
     });
     
     jQuery(window).resize(function(event){
         update_editor_height();
     });
-    
-    //~ reload_doc_structure();
 });

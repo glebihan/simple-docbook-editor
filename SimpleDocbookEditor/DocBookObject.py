@@ -3,6 +3,7 @@
 import libxml2
 import os
 import logging
+import urlparse
 
 OBJECT_IDS = 0
 
@@ -14,12 +15,16 @@ EDIT_MODES = {
     "sect3": "html"
 }
 
-DOCBOOK_TO_HTML = {
+DOCBOOK_TO_HTML_NODES = {
     "chapter": "div",
     "sect1": "div",
     "sect2": "div",
     "sect3": "div",
     "note": "div",
+    "figure": "div",
+    "screenshot": "div",
+    "imageobject": "div",
+    "mediaobject": "div",
     "title": "h1",
     "para": "p",
     "itemizedlist": "ul",
@@ -40,7 +45,8 @@ DOCBOOK_TO_HTML = {
     "tbody": "tbody",
     "row": "tr",
     "entry": "td",
-    "ulink": "a"
+    "ulink": "a",
+    "imagedata": "img"
 }
 DOCBOOK_ELEMENT_TYPE_TO_CLASS = [
     "chapter",
@@ -59,18 +65,30 @@ DOCBOOK_ELEMENT_TYPE_TO_CLASS = [
     "guimenuitem",
     "keycombo",
     "keycap",
+    "figure",
+    "screenshot",
+    "mediaobject",
+    "imageobject",
 ]
 DOCBOOK_JUMP_NODES = [
     "tgroup"
 ]
+DOCBOOK_TO_HTML_PROPS = {
+    "url": "href",
+    "fileref": "src",
+    "id": "id",
+    "width": "width"
+}
 
 class DocBookObject(object):
-    def __init__(self, **params):
+    def __init__(self, parent = None, **params):
         global OBJECT_IDS
         
+        self._parent = parent
         self._params = params
         
         self._already_warned_unconverted_docbook_node_type = []
+        self._already_warned_unconverted_docbook_prop = []
         
         OBJECT_IDS += 1
         self.object_id = OBJECT_IDS
@@ -85,6 +103,12 @@ class DocBookObject(object):
     def _get_filename(self):
         return self._params.setdefault("filename", None)
     filename = property(_get_filename)
+    
+    def get_real_filename(self):
+        if self.filename:
+            return self.filename
+        else:
+            return self._parent.filename
     
     def _load_from_file(self):
         logging.debug("Parsing file %s" % self.filename)
@@ -101,11 +125,11 @@ class DocBookObject(object):
                 if child.name == "include":
                     include_filename = os.path.join(os.path.split(self.filename)[0], child.prop("href"))
                     if os.path.exists(include_filename):
-                        self._children.append(DocBookObject(filename = include_filename))
+                        self._children.append(DocBookObject(self, filename = include_filename))
                     else:
-                        self._children.append(DocBookObject(xml_object = child))
+                        self._children.append(DocBookObject(self, xml_object = child))
                 else:
-                    self._children.append(DocBookObject(xml_object = child))
+                    self._children.append(DocBookObject(self, xml_object = child))
                 child = child.next
     
     def _get_element_type(self):
@@ -152,11 +176,30 @@ class DocBookObject(object):
             self._already_warned_unconverted_docbook_node_type.append(node_type)
             logging.warn("Unconverted docbook node type : %s" % node_type)
     
+    def _warn_unconverted_docbook_prop(self, prop_name):
+        if not prop_name in self._already_warned_unconverted_docbook_prop:
+            self._already_warned_unconverted_docbook_prop.append(prop_name)
+            logging.warn("Unconverted docbook property : %s" % prop_name)
+    
+    def _docbook_to_html_process_properties(self, xml_node, html_node):
+        prop = xml_node.get_properties()
+        while prop:
+            if prop.name in DOCBOOK_TO_HTML_PROPS:
+                prop_value = xml_node.prop(prop.name)
+                if prop.name == "fileref":
+                    prop_value = urlparse.urljoin('file:', os.path.join(os.path.split(self.get_real_filename())[0], prop_value))
+                html_node.setProp(DOCBOOK_TO_HTML_PROPS[prop.name], prop_value)
+            else:
+                self._warn_unconverted_docbook_prop(prop.name)
+            prop = prop.next
+    
     def _docbook_to_html_node(self, xml_node):
         if xml_node.name == "text":
             return xml_node.copyNode(False)
-        elif xml_node.name in DOCBOOK_TO_HTML:
-            return self._docbook_to_html(xml_node)
+        elif xml_node.name in DOCBOOK_TO_HTML_NODES:
+            res = self._docbook_to_html(xml_node)
+            self._docbook_to_html_process_properties(xml_node, res)
+            return res
         elif xml_node.name in DOCBOOK_JUMP_NODES:
             res = []
             subchild = xml_node.children
@@ -173,7 +216,7 @@ class DocBookObject(object):
             return None
     
     def _docbook_to_html(self, xml_node):
-        html_node = libxml2.newNode(DOCBOOK_TO_HTML[xml_node.name])
+        html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             html_node.newProp("class", xml_node.name)
         child = xml_node.children

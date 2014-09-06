@@ -6,6 +6,7 @@ import os
 import urlparse
 import urllib
 import json
+import logging
 from OpenBookDialog import OpenBookDialog
 
 class MainWindow(object):
@@ -68,6 +69,8 @@ class MainWindow(object):
             self._webview_pending_commands.append(command)
     
     def _on_webview_script_alert(self, editor, frame, message):
+        logging.debug("_on_webview_script_alert:%s" % message)
+        
         if ":" in message:
             i = message.index(":")
             command = message[:i]
@@ -115,5 +118,5 @@ class MainWindow(object):
         
         self._webview.load_html_string(data, urlparse.urljoin('file:', urllib.pathname2url(filename)))
     
-    def refresh_view_for_new_book(self):
-        self.send_command("refresh_view_for_new_book()")
+    def refresh_view_for_new_book(self, section_id):
+        self.send_command("refresh_view_for_new_book(%d)" % section_id)
