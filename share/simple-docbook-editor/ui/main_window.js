@@ -125,9 +125,16 @@ jQuery(document).ready(function()
         },
         menubar: false,
         statusbar: false,
-        plugins: ["code image"],
+        plugins: ["code image noneditable"],
         toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | code",
-        relative_urls: false
+        relative_urls: false,
+        content_style: (
+            'div.sect1,div.sect2,div.sect3 {background-color: #B3B3B3;}' +
+            'div.sect1:before {content: "sect1"}' +
+            'div.sect2:before {content: "sect2"}' +
+            'div.sect3:before {content: "sect3"}'
+        ),
+        object_resizing: "img,table"
     });
     
     jQuery(window).resize(function(event){

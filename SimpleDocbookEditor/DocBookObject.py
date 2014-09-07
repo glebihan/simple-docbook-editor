@@ -303,14 +303,18 @@ class DocBookObject(object):
             self._warn_unconverted_docbook_node_type(xml_node.name)
             return None
     
-    def _docbook_to_html(self, xml_node):
+    def _docbook_to_html(self, xml_node, is_root = False):
         if xml_node.name == "title" and xml_node.parent.name == "figure":
             html_node = libxml2.newNode("figcaption")
         else:
             html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
         self._docbook_to_html_process_properties(xml_node, html_node)
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
-            html_node.newProp("class", xml_node.name)
+            if (xml_node.name in ["chapter"] or xml_node.name.startswith("sect")) and not is_root:
+                html_node.newProp("class", "%s mceNonEditable" % xml_node.name)
+            else:
+                html_node.newProp("class", xml_node.name)
+            html_node.newProp("data-docbook-type", xml_node.name)
         child = xml_node.children
         while child:
             html_child = self._docbook_to_html_node(child)
@@ -327,7 +331,7 @@ class DocBookObject(object):
             return html_node.copyNode(False)
         #~ elif html_node.type == "entity_ref":
             #~ return libxml2.newText(str(html_node))
-        elif html_node.name in ["div", "span"] and html_node.prop("class") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
+        elif html_node.name in ["div", "span"] and html_node.prop("data-docbook-type") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             res = self._html_to_docbook(html_node)
             self._html_to_docbook_process_properties(html_node, res)
             return res
@@ -353,8 +357,8 @@ class DocBookObject(object):
     def _html_to_docbook(self, html_node):
         if html_node.name == "html":
             return self._html_to_docbook_node(html_node)[0]
-        elif html_node.name in ["div", "span"] and html_node.prop("class") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
-            xml_node = libxml2.newNode(html_node.prop("class"))
+        elif html_node.name in ["div", "span"] and html_node.prop("data-docbook-type") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
+            xml_node = libxml2.newNode(html_node.prop("data-docbook-type"))
         else:
             xml_node = libxml2.newNode(HTML_TO_DOCBOOK_NODES[html_node.name])
         self._html_to_docbook_process_properties(html_node, xml_node)
@@ -403,7 +407,7 @@ class DocBookObject(object):
     def get_html(self):
         assert (self.edit_mode == "html")
         
-        return self._docbook_to_html(self._xml_root)
+        return self._docbook_to_html(self._xml_root, True)
     
     def update_from_html(self, html):
         assert (self.edit_mode == "html")
