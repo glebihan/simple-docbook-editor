@@ -9,4 +9,4 @@
 	url = https://github.com/mbraak/jqTree.git
 [submodule "tinymce"]
 	path = tinymce
-	url = https://github.com/tinymce/tinymce.git
+	url = git@github.com:glebihan/simple-docbook-editor-tinymce.git
