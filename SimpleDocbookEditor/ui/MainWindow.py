@@ -61,6 +61,7 @@ class MainWindow(object):
         builder.get_object("quit_menu_item").connect("activate", self._on_quit_clicked)
         builder.get_object("open_book_menuitem").connect("activate", self._on_open_book_clicked)
         builder.get_object("save_book_menuitem").connect("activate", self._on_save_book_clicked)
+        builder.get_object("close_book_menuitem").connect("activate", self._on_close_book_clicked)
         builder.get_object("about_menuitem").connect("activate", self._on_about_clicked)
         
         self._open_book_dialog = OpenBookDialog(self._application, self._window)
@@ -79,6 +80,17 @@ class MainWindow(object):
     
     def _on_window_delete_event(self, window, event):
         return self._check_quit()
+    
+    def _on_close_book_clicked(self, menuitem):
+        if self._application.book:
+            if self._application.book.changed:
+                resp = self._save_quit_dialog.run()
+                if resp == gtk.RESPONSE_YES:
+                    self._application.book.save()
+                elif resp != gtk.RESPONSE_NO:
+                    return
+            self._application.unload_book()
+            self.send_command("set_doc_structure(null)")
     
     def _on_about_clicked(self, menuitem):
         self._about_dialog.run()
@@ -163,5 +175,9 @@ class MainWindow(object):
         
         self._webview.load_html_string(data, urlparse.urljoin('file:', urllib.pathname2url(filename)))
     
-    def refresh_view_for_new_book(self, section_id):
+    def refresh_view_for_new_book(self, section_id = 0):
         self.send_command("refresh_view_for_new_book(%d)" % section_id)
+        if self._application.book:
+            self._window.set_title("%s - %s" % (_(APPNAME), self._application.book.filename))
+        else:
+            self._window.set_title("%s" % _(APPNAME))

@@ -27,7 +27,7 @@ class SaveQuitDialog(gtk.MessageDialog):
         
         self.set_title(_("Confirmation"))
         self.set_markup("<big><b>%s</b></big>" % _("Save before closing ?"))
-        self.format_secondary_text(_("You have unsaved changes. These changes will be lost if you quit without saving."))
+        self.format_secondary_text(_("You have unsaved changes. These changes will be lost if you close without saving."))
         
         self.add_button(gtk.STOCK_YES, gtk.RESPONSE_YES)
         self.add_button(gtk.STOCK_NO, gtk.RESPONSE_NO)

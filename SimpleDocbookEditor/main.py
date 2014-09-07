@@ -58,6 +58,10 @@ class SimpleDocbookEditor(object):
         self.book.store_saved_state()
         self._window.refresh_view_for_new_book(section_id)
     
+    def unload_book(self):
+        self.book = None
+        self._window.refresh_view_for_new_book()
+    
     def run(self):
         assert (len(self.files_to_open) <= 1)
         if len(self.files_to_open) == 1:

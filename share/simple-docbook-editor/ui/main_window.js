@@ -10,15 +10,22 @@ function reload_doc_structure()
 
 function set_doc_structure(doc_structure)
 {
-    jQuery("#doc_structure").tree("loadData", [doc_structure]);
-    if (selected_doc_section){
-        node = jQuery("#doc_structure").tree("getNodeById", selected_doc_section);
-        jQuery("#doc_structure").tree('selectNode', node);
+    if (doc_structure === null)
+    {
+        jQuery("#doc_structure").tree("loadData", []);
     }
-    for (var i in doc_structure_closed_nodes){
-        node = jQuery("#doc_structure").tree("getNodeById", doc_structure_closed_nodes[i]);
-        if (node){
-            jQuery("#doc_structure").tree('closeNode', node);
+    else
+    {
+        jQuery("#doc_structure").tree("loadData", [doc_structure]);
+        if (selected_doc_section){
+            node = jQuery("#doc_structure").tree("getNodeById", selected_doc_section);
+            jQuery("#doc_structure").tree('selectNode', node);
+        }
+        for (var i in doc_structure_closed_nodes){
+            node = jQuery("#doc_structure").tree("getNodeById", doc_structure_closed_nodes[i]);
+            if (node){
+                jQuery("#doc_structure").tree('closeNode', node);
+            }
         }
     }
 }
