@@ -24,7 +24,7 @@ function set_doc_structure(doc_structure)
         for (var i in doc_structure_closed_nodes){
             node = jQuery("#doc_structure").tree("getNodeById", doc_structure_closed_nodes[i]);
             if (node){
-                jQuery("#doc_structure").tree('closeNode', node);
+                jQuery("#doc_structure").tree('closeNode', node, false);
             }
         }
     }
