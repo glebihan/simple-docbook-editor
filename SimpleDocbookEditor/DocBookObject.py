@@ -406,6 +406,7 @@ class DocBookObject(object):
         
         html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[self._xml_root.name])
         html_node.newProp("data-docbook-type", self._xml_root.name)
+        html_node.newProp("data-section-id", str(self.object_id))
         if not root:
             html_node.newProp("class", "%s mceNonEditable" % self._xml_root.name)
         self._docbook_to_html_process_properties(self._xml_root, html_node)
