@@ -310,10 +310,7 @@ class DocBookObject(object):
             html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
         self._docbook_to_html_process_properties(xml_node, html_node)
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
-            if (xml_node.name in ["chapter"] or xml_node.name.startswith("sect")) and not is_root:
-                html_node.newProp("class", "%s mceNonEditable" % xml_node.name)
-            else:
-                html_node.newProp("class", xml_node.name)
+            html_node.newProp("class", xml_node.name)
             html_node.newProp("data-docbook-type", xml_node.name)
         child = xml_node.children
         while child:
@@ -404,10 +401,25 @@ class DocBookObject(object):
                 self._warn_unconverted_html_prop(prop.name)
             prop = prop.next
     
-    def get_html(self):
+    def get_html(self, root = True):
         assert (self.edit_mode == "html")
         
-        return self._docbook_to_html(self._xml_root, True)
+        html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[self._xml_root.name])
+        html_node.newProp("data-docbook-type", self._xml_root.name)
+        if not root:
+            html_node.newProp("class", "%s mceNonEditable" % self._xml_root.name)
+        self._docbook_to_html_process_properties(self._xml_root, html_node)
+        for i in self._children:
+            if (i.element_type in ["chapter"] or i.element_type.startswith("sect")):
+                child_node = i.get_html(False)
+            else:
+                child_node = self._docbook_to_html_node(i.get_xml_node())
+            if type(child_node) != list:
+                child_node = [child_node]
+            for j in child_node:
+                html_node.addChild(j)
+        
+        return html_node
     
     def update_from_html(self, html):
         assert (self.edit_mode == "html")
@@ -441,3 +453,6 @@ class DocBookObject(object):
     def _get_changed(self):
         return self.content_hash != self._saved_state
     changed = property(_get_changed)
+    
+    def get_xml_node(self):
+        return self._xml_root
