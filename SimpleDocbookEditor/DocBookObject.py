@@ -143,6 +143,8 @@ class DocBookObject(object):
         OBJECT_IDS += 1
         self.object_id = OBJECT_IDS
         
+        self._children = []
+        
         assert ("filename" in self._params) or ("xml_object" in self._params)
         
         if "filename" in params and params["filename"] != None:
@@ -168,19 +170,24 @@ class DocBookObject(object):
     
     def _load_from_xml_object(self, xml_object):
         self._xml_root = xml_object
-        self._children = []
+        new_children = []
         if xml_object.children:
             child = xml_object.children
             while child:
                 if child.name == "include":
                     include_filename = os.path.join(os.path.split(self.filename)[0], child.prop("href"))
                     if os.path.exists(include_filename):
-                        self._children.append(DocBookObject(self, filename = include_filename))
+                        new_children.append(DocBookObject(self, filename = include_filename))
                     else:
-                        self._children.append(DocBookObject(self, xml_object = child))
+                        new_children.append(DocBookObject(self, xml_object = child))
                 else:
-                    self._children.append(DocBookObject(self, xml_object = child))
+                    already_loaded_child = self.find_by_node(child)
+                    if already_loaded_child:
+                        new_children.append(already_loaded_child)
+                    else:
+                        new_children.append(DocBookObject(self, xml_object = child))
                 child = child.next
+        self._children = new_children
     
     def _get_element_type(self):
         return self._xml_root.name
@@ -231,6 +238,15 @@ class DocBookObject(object):
         else:
             for i in self._children:
                 res = i.find_section_by_id(section_id)
+                if res:
+                    return res
+    
+    def find_by_node(self, node):
+        if node == self._xml_root:
+            return self
+        else:
+            for i in self._children:
+                res = i.find_by_node(node)
                 if res:
                     return res
     
