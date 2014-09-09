@@ -355,6 +355,10 @@ class DocBookObject(object):
         if html_node.name == "html":
             return self._html_to_docbook_node(html_node)[0]
         elif html_node.name in ["div", "span"] and html_node.prop("data-docbook-type") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
+            if html_node.prop("data-section-id") and int(html_node.prop("data-section-id")) != self.object_id:
+                section = self.find_section_by_id(int(html_node.prop("data-section-id")))
+                if section:
+                    return section.get_xml_node()
             xml_node = libxml2.newNode(html_node.prop("data-docbook-type"))
         else:
             xml_node = libxml2.newNode(HTML_TO_DOCBOOK_NODES[html_node.name])
