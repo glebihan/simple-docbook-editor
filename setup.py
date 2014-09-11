@@ -19,9 +19,41 @@
 # You should have received a copy of the GNU General Public License
 # along with Simple DocBook Editor.  If not, see <http://www.gnu.org/licenses/>.
 
+from distutils.command.build import build as _build
 from distutils.core import setup
 import sys, os
 from SimpleDocbookEditor.informations import *
+
+class build(_build):
+    def run(self):
+        # build tinymce
+        os.chdir("tinymce")
+        os.system("npm install")
+        os.system("jake")
+        os.chdir("..")
+        os.system("cp -R tinymce/js/tinymce share/simple-docbook-editor")
+        os.system("cp -R tinymce/LICENSE.TXT share/simple-docbook-editor/tinymce")
+
+        # build jquery
+        os.chdir("jquery")
+        os.system("npm run build")
+        os.chdir("..")
+        os.system("mkdir -p share/simple-docbook-editor/jquery")
+        os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
+
+        # build jquery-ui
+        os.chdir("jquery-ui")
+        os.system("npm install")
+        os.system("grunt concat")
+        os.chdir("..")
+        os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
+        os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
+
+        # package jqTree
+        os.system("mkdir -p share/simple-docbook-editor/jqTree")
+        os.system("cp -R jqTree/tree.jquery.js jqTree/LICENSE share/simple-docbook-editor/jqTree")
+        
+        _build.run(self)
 
 def list_packages():
     res = ['SimpleDocbookEditor']
@@ -35,8 +67,6 @@ def list_share_files():
     res = []
     for dirpath, dirnames, filenames in os.walk('share'):
         dirfileslist = []
-        if ".svn" in dirpath:
-            continue
         for i in filenames:
             if not i.endswith("~") and not i.endswith(".bak") and os.path.isfile(os.path.join(dirpath, i)):
                 dirfileslist.append(os.path.join(dirpath, i))
@@ -49,34 +79,8 @@ package_dir = {}
 for i in packages:
     package_dir[i] = i.replace(".", "/")
 
-# build tinymce
-os.chdir("tinymce")
-os.system("npm install")
-os.system("jake")
-os.chdir("..")
-os.system("cp -R tinymce/js/tinymce share/simple-docbook-editor")
-os.system("cp -R tinymce/LICENSE.TXT share/simple-docbook-editor/tinymce")
-
-# build jquery
-os.chdir("jquery")
-os.system("npm run build")
-os.chdir("..")
-os.system("mkdir -p share/simple-docbook-editor/jquery")
-os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
-
-# build jquery-ui
-os.chdir("jquery-ui")
-os.system("npm install")
-os.system("grunt concat")
-os.chdir("..")
-os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
-os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
-
-# package jqTree
-os.system("mkdir -p share/simple-docbook-editor/jqTree")
-os.system("cp -R jqTree/tree.jquery.js jqTree/LICENSE share/simple-docbook-editor/jqTree")
-
 setup(
+    cmdclass = {'build': build},
     name = UNIX_APPNAME,
     version = VERSION,
     author = AUTHORS[0]["name"],
