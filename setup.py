@@ -44,7 +44,7 @@ class build(_build):
         # build jquery-ui
         os.chdir("jquery-ui")
         os.system("npm install")
-        os.system("grunt concat")
+        os.system("../node_modules/.bin/grunt concat")
         os.chdir("..")
         os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
         os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
