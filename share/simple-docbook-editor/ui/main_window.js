@@ -1,6 +1,7 @@
 var doc_structure_closed_nodes = new Array();
 var selected_doc_section = null;
 var edited_section_id = 0;
+var edited_section_node = null;
 var saveTimeout = null;
 var current_file_browser_window = null;
 
@@ -46,9 +47,10 @@ function load_doc_section(section_id)
 
 function set_edit_data(edit_data)
 {
+    edited_section_node = jQuery(edit_data.html);
     edited_section_id = edit_data.section_id;
     selected_doc_section = edit_data.section_id;
-    tinymce.get("tinymcecontainer").setContent(edit_data.html);
+    tinymce.get("tinymcecontainer").setContent(edited_section_node.html());
     update_editor_height();
 }
 
@@ -67,9 +69,10 @@ function refresh_view_for_new_book(section_id)
 
 function do_save_editor_contents()
 {
+    edited_section_node.html(tinymce.get("tinymcecontainer").getContent());
     if (edited_section_id)
     {
-        alert('set_section_contents:' + edited_section_id + ':' + tinymce.get("tinymcecontainer").getContent());
+        alert('set_section_contents:' + edited_section_id + ':' + edited_section_node[0].outerHTML);
     }
 }
 

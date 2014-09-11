@@ -14,7 +14,7 @@ tinymce.PluginManager.add('docbook_subsections', function(editor)
 {
     function createSubsection()
     {
-        var current_section_type = jQuery(editor.getBody().firstChild).attr("data-docbook-type");
+        var current_section_type = edited_section_node.attr("data-docbook-type");
         var new_section_type;
         if (current_section_type == "chapter")
         {
