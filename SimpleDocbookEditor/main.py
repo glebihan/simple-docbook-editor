@@ -39,6 +39,8 @@ class SimpleDocbookEditor(object):
         self._parse_cli_options()
         self._init_logger()
         
+        self.book = None
+        
         self._window = MainWindow(self)
     
     def _parse_cli_options(self):
