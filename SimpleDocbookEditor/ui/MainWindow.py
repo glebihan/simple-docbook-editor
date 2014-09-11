@@ -103,6 +103,10 @@ class MainWindow(object):
     def _on_open_book_clicked(self, menuitem):
         filename = self._open_book_dialog.run()
         if filename:
+            if self._application.book:
+                self._on_close_book_clicked(menuitem)
+            if self._application.book:
+                return
             self._application.load_book(filename)
     
     def _on_save_book_clicked(self, menuitem):
