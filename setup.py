@@ -27,12 +27,19 @@ from SimpleDocbookEditor.informations import *
 class build(_build):
     def run(self):
         # build tinymce
+        for custom_plugin in os.listdir("tinymce-plugins-overrides"):
+            os.system("mv \"tinymce/js/tinymce/plugins/%s\" \"tinymce/js/tinymce/plugins/%s.orig\"" % (custom_plugin, custom_plugin))
+            os.system("cp -R \"tinymce-plugins-overrides/%s\" tinymce/js/tinymce/plugins" % custom_plugin)
         os.chdir("tinymce")
         os.system("npm install")
         os.system("jake")
         os.chdir("..")
         os.system("cp -R tinymce/js/tinymce share/simple-docbook-editor")
         os.system("cp -R tinymce/LICENSE.TXT share/simple-docbook-editor/tinymce")
+        os.system("rm -rf share/simple-docbook-editor/tinymce/plugins/*.orig")
+        for custom_plugin in os.listdir("tinymce-plugins-overrides"):
+            os.system("rm -rf \"tinymce/js/tinymce/plugins/%s\"" % custom_plugin)
+            os.system("mv \"tinymce/js/tinymce/plugins/%s.orig\" \"tinymce/js/tinymce/plugins/%s\"" % (custom_plugin, custom_plugin))
 
         # build jquery
         os.chdir("jquery")
