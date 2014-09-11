@@ -65,6 +65,13 @@ function refresh_view_for_new_book(section_id)
     reload_doc_structure();
 }
 
+function do_save_editor_contents()
+{
+    if (edited_section_id)
+    {
+        alert('set_section_contents:' + edited_section_id + ':' + tinymce.get("tinymcecontainer").getContent());
+    }
+}
 
 function save_editor_contents()
 {
@@ -72,13 +79,7 @@ function save_editor_contents()
     {
         clearTimeout(saveTimeout);
     }
-    saveTimeout = setTimeout(function()
-    {
-        if (edited_section_id)
-        {
-            alert('set_section_contents:' + edited_section_id + ':' + tinymce.get("tinymcecontainer").getContent());
-        }
-    }, 300);
+    saveTimeout = setTimeout(do_save_editor_contents, 300);
 }
 
 function set_file_browser_filename(data)
@@ -161,8 +162,8 @@ jQuery(document).ready(function()
         },
         menubar: false,
         statusbar: false,
-        plugins: ["code image noneditable"],
-        toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | code",
+        plugins: ["code image noneditable docbook_subsections"],
+        toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
         relative_urls: false,
         content_style: (
             'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
