@@ -27,6 +27,7 @@ import urllib
 import json
 import logging
 from OpenBookDialog import OpenBookDialog
+from ImageBrowserDialog import ImageBrowserDialog
 from AboutDialog import AboutDialog
 from SaveQuitDialog import SaveQuitDialog
 from ..informations import *
@@ -67,6 +68,7 @@ class MainWindow(object):
         self._open_book_dialog = OpenBookDialog(self._application, self._window)
         self._about_dialog = AboutDialog(self._window)
         self._save_quit_dialog = SaveQuitDialog(self._window)
+        self._image_browser_dialog = ImageBrowserDialog(self._application, self._window)
     
     def _check_quit(self):
         if self._application.book and self._application.book.changed:
@@ -150,6 +152,17 @@ class MainWindow(object):
             section = self._application.book.find_section_by_id(section_id)
             section.update_from_html(contents)
             self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
+        elif command == "browse_image":
+            i = params.index(":")
+            field_name = params[:i] 
+            url = params[i+1:]
+            if url:
+                filename = urllib.url2pathname(url)[7:]
+            else:
+                filename = None
+            new_filename = self._image_browser_dialog.run(filename)
+            if new_filename:
+                self.send_command("set_file_browser_filename(%s)" % json.dumps({"field_name": field_name, "url": urlparse.urljoin('file:', urllib.pathname2url(new_filename))}))
         else:
             return False
             
