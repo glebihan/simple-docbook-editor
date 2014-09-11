@@ -116,6 +116,14 @@ jQuery(document).ready(function()
     tinymce.init({
         selector: "#tinymcecontainer",
         setup: function(editor){
+            editor.on('click', function(e){
+                if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
+                {
+                    selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
+                    load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
+                    reload_doc_structure();
+                }
+            });
             editor.on('change', function(e){
                 save_editor_contents();
             });
@@ -136,10 +144,7 @@ jQuery(document).ready(function()
         toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | code",
         relative_urls: false,
         content_style: (
-            'div.sect1,div.sect2,div.sect3 {background-color: #B3B3B3;}' +
-            'div.sect1:before {content: "sect1"}' +
-            'div.sect2:before {content: "sect2"}' +
-            'div.sect3:before {content: "sect3"}'
+            'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
         ),
         object_resizing: "img,table"
     });

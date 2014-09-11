@@ -427,18 +427,20 @@ class DocBookObject(object):
         html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[self._xml_root.name])
         html_node.newProp("data-docbook-type", self._xml_root.name)
         html_node.newProp("data-section-id", str(self.object_id))
-        if not root:
-            html_node.newProp("class", "%s mceNonEditable" % self._xml_root.name)
         self._docbook_to_html_process_properties(self._xml_root, html_node)
-        for i in self._children:
-            if (i.element_type in ["chapter"] or i.element_type.startswith("sect")):
-                child_node = i.get_html(False)
-            else:
-                child_node = self._docbook_to_html_node(i.get_xml_node())
-            if type(child_node) != list:
-                child_node = [child_node]
-            for j in child_node:
-                html_node.addChild(j)
+        if root:
+            for i in self._children:
+                if (i.element_type in ["chapter"] or i.element_type.startswith("sect")):
+                    child_node = i.get_html(False)
+                else:
+                    child_node = self._docbook_to_html_node(i.get_xml_node())
+                if type(child_node) != list:
+                    child_node = [child_node]
+                for j in child_node:
+                    html_node.addChild(j)
+        else:
+            html_node.newProp("class", "subsection %s mceNonEditable" % self._xml_root.name)
+            html_node.addChild(libxml2.newText("Subsection (%s) \"%s\"" % (self._xml_root.name, self.title)))
         
         return html_node
     
