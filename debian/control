@@ -1,0 +1,13 @@
+Source: simple-docbook-editor
+Section: doc
+Priority: optional
+Maintainer: Gwendal Le Bihan <gwendal.lebihan.dev@gmail.com>
+Build-Depends: cdbs (>= 0.4.49), python-all-dev (>= 2.3.5-11), npm, node-jake
+XS-Python-Version: current
+Standards-Version: 3.7.2
+
+Package: simple-docbook-editor
+Architecture: all
+Depends: ${python:Depends}, python-libxml2, python-gtk2, python-webkit
+XB-Python-Version: ${python:Versions}
+Description: An easy to use DocBook editor
