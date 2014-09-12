@@ -6,11 +6,16 @@
         <script type="text/javascript" src="../jqTree/tree.jquery.js"></script>
         <script type='text/javascript' src='../tinymce/tinymce.min.js'></script>
         <script type='text/javascript' src='../tinymce-custom-plugins/docbook_subsections/plugin.js'></script>
+        <script type='text/javascript' src='../CodeMirror/codemirror.min.js'></script>
+        <script type='text/javascript' src='../CodeMirror/addon/edit/closetag.js'></script>
+        <script type='text/javascript' src='../CodeMirror/mode/fold/xml-fold.js'></script>
+        <script type='text/javascript' src='../CodeMirror/mode/xml/xml.js'></script>
         <script type='text/javascript' src='main_window.js'></script>
         
         <link rel="stylesheet" type="text/css" href="main_window.css"/>
         <link rel="stylesheet" type="text/css" href="../jquery-ui-custom-theme/jquery-ui-1.10.4.custom.css">
         <link rel="stylesheet" type="text/css" href="jqtree.css"/>
+        <link rel="stylesheet" type="text/css" href="../CodeMirror/codemirror.css"/>
     </head>
     <body>
         <div id="header"></div>
@@ -24,8 +29,19 @@
         <div id="editor_wrapper">
             <div id="editor_inside_wrapper">
                 <div id="editor_inside_inside_wrapper">
-                    <div id="editor">
-                        <div id='tinymcecontainer'></div>
+                    <div id="maintabs">
+                        <ul>
+                            <li><a href="#maintabs-1">_(WYSIWYG editor)</a></li>
+                            <li><a href="#maintabs-2">_(Source editor)</a></li>
+                        </ul>
+                        <div id="maintabs-1">
+                            <div id="editor">
+                                <div id='tinymcecontainer'></div>
+                            </div>
+                        </div>
+                        <div id="maintabs-2">
+                            <textarea id="source_editor" name="source_editor"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>

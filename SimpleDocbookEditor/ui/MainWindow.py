@@ -148,7 +148,9 @@ class MainWindow(object):
             section_id = int(params)
             section = self._application.book.find_section_by_id(section_id)
             if section.edit_mode == "html":
-                self.send_command("set_edit_data(%s)" % json.dumps({"section_id": section_id, "edit_mode": "html", "html": str(section.get_html())}))
+                self.send_command("set_edit_data(%s)" % json.dumps({"section_id": section_id, "edit_mode": section.edit_mode, "html": str(section.get_html()), "xml": str(section.get_xml_node())}))
+            else:
+                self.send_command("set_edit_data(%s)" % json.dumps({"section_id": section_id, "edit_mode": section.edit_mode, "xml": str(section.get_xml_node())}))
         elif command == "set_section_contents":
             i = params.index(":")
             section_id = int(params[:i])

@@ -78,13 +78,18 @@ class build(_build):
         # package CodeMirror
         if os.path.exists("share/simple-docbook-editor/CodeMirror"):
             os.system("rm -rf share/simple-docbook-editor/CodeMirror/*")
+            os.system("mkdir -p share/simple-docbook-editor/CodeMirror/addon")
+            os.system("mkdir -p share/simple-docbook-editor/CodeMirror/mode")
         else:
-            os.system("mkdir -p share/simple-docbook-editor/CodeMirror")
+            os.system("mkdir -p share/simple-docbook-editor/CodeMirror/addon")
+            os.system("mkdir -p share/simple-docbook-editor/CodeMirror/mode")
         os.chdir("CodeMirror")
         os.system("./bin/compress lib/codemirror.js > ../share/simple-docbook-editor/CodeMirror/codemirror.min.js")
         os.chdir("..")
         os.system("cp CodeMirror/lib/codemirror.css share/simple-docbook-editor/CodeMirror")
         os.system("cp CodeMirror/LICENSE share/simple-docbook-editor/CodeMirror")
+        os.system("cp -R CodeMirror/addon/* share/simple-docbook-editor/CodeMirror/addon")
+        os.system("cp -R CodeMirror/mode/* share/simple-docbook-editor/CodeMirror/mode")
         
         _build.run(self)
 

@@ -4,6 +4,7 @@ var edited_section_id = 0;
 var edited_section_node = null;
 var saveTimeout = null;
 var current_file_browser_window = null;
+var source_editor = null;
 
 function reload_doc_structure()
 {
@@ -47,11 +48,15 @@ function load_doc_section(section_id)
 
 function set_edit_data(edit_data)
 {
-    edited_section_node = jQuery(edit_data.html);
+    if (edit_data.edit_mode == "html")
+    {
+        edited_section_node = jQuery(edit_data.html);
+        tinymce.get("tinymcecontainer").setContent(edited_section_node.html());
+    }
     edited_section_id = edit_data.section_id;
     selected_doc_section = edit_data.section_id;
-    tinymce.get("tinymcecontainer").setContent(edited_section_node.html());
     update_editor_height();
+    source_editor.setValue(edit_data.xml);
 }
 
 function update_editor_height(){
@@ -182,8 +187,18 @@ jQuery(document).ready(function()
         }
     });
     
+    source_editor = CodeMirror.fromTextArea(document.getElementById("source_editor"),
+    {
+        mode: 'text/html',
+        autoCloseTags: true,
+        lineNumbers: true,
+        indentUnit: 4
+    });
+    
     jQuery(window).resize(function(event)
     {
         update_editor_height();
     });
+    
+    jQuery("#maintabs").tabs();
 });
