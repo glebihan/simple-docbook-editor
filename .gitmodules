@@ -10,3 +10,6 @@
 [submodule "tinymce"]
 	path = tinymce
 	url = git@github.com:glebihan/simple-docbook-editor-tinymce.git
+[submodule "CodeMirror"]
+	path = CodeMirror
+	url = https://github.com/marijnh/CodeMirror.git

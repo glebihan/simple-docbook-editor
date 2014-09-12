@@ -57,6 +57,7 @@ share/simple-docbook-editor/jquery
 share/simple-docbook-editor/jquery-ui
 share/simple-docbook-editor/jqTree
 share/simple-docbook-editor/tinymce
+share/simple-docbook-editor/CodeMirror
 debian/files
 debian/python-module-stampdir/
 debian/*.debhelper

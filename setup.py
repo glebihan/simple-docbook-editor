@@ -27,6 +27,10 @@ from SimpleDocbookEditor.informations import *
 class build(_build):
     def run(self):
         # build tinymce
+        if os.path.exists("share/simple-docbook-editor/tinymce"):
+            os.system("rm -rf share/simple-docbook-editor/tinymce/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/tinymce")
         for custom_plugin in os.listdir("tinymce-plugins-overrides"):
             if os.path.exists("tinymce/js/tinymce/plugins/%s" % custom_plugin):
                 os.system("mv \"tinymce/js/tinymce/plugins/%s\" \"tinymce/js/tinymce/plugins/%s.orig\"" % (custom_plugin, custom_plugin))
@@ -44,23 +48,43 @@ class build(_build):
                 os.system("mv \"tinymce/js/tinymce/plugins/%s.orig\" \"tinymce/js/tinymce/plugins/%s\"" % (custom_plugin, custom_plugin))
 
         # build jquery
+        if os.path.exists("share/simple-docbook-editor/jquery"):
+            os.system("rm -rf share/simple-docbook-editor/jquery/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/jquery")
         os.chdir("jquery")
         os.system("npm run build")
         os.chdir("..")
-        os.system("mkdir -p share/simple-docbook-editor/jquery")
         os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
 
         # build jquery-ui
+        if os.path.exists("share/simple-docbook-editor/jquery-ui"):
+            os.system("rm -rf share/simple-docbook-editor/jquery-ui/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
         os.chdir("jquery-ui")
         os.system("npm install")
         os.system("../node_modules/.bin/grunt concat")
         os.chdir("..")
-        os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
         os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
 
         # package jqTree
-        os.system("mkdir -p share/simple-docbook-editor/jqTree")
+        if os.path.exists("share/simple-docbook-editor/jqTree"):
+            os.system("rm -rf share/simple-docbook-editor/jqTree/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/jqTree")
         os.system("cp -R jqTree/tree.jquery.js jqTree/LICENSE share/simple-docbook-editor/jqTree")
+        
+        # package CodeMirror
+        if os.path.exists("share/simple-docbook-editor/CodeMirror"):
+            os.system("rm -rf share/simple-docbook-editor/CodeMirror/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/CodeMirror")
+        os.chdir("CodeMirror")
+        os.system("./bin/compress lib/codemirror.js > ../share/simple-docbook-editor/CodeMirror/codemirror.min.js")
+        os.chdir("..")
+        os.system("cp CodeMirror/lib/codemirror.css share/simple-docbook-editor/CodeMirror")
+        os.system("cp CodeMirror/LICENSE share/simple-docbook-editor/CodeMirror")
         
         _build.run(self)
 
