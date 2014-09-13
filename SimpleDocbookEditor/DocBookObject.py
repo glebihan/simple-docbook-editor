@@ -479,3 +479,8 @@ class DocBookObject(object):
     
     def get_xml_node(self):
         return self._xml_root
+    
+    def get_document(self):
+        assert(hasattr(self, "_xml_document"))
+        
+        return self._xml_document
