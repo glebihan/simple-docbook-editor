@@ -61,6 +61,7 @@ function set_edit_data(edit_data)
 
 function update_editor_height(){
     jQuery("#tinymcecontainer_ifr").css("height", (jQuery("#editor_inside_wrapper").height() - jQuery("#tinymcecontainer_ifr").offset().top) + "px");
+    source_editor.setSize(null, jQuery("#editor_inside_wrapper").height() - jQuery("div.CodeMirror").offset().top);
 }
 
 function refresh_view_for_new_book(section_id)
@@ -200,5 +201,11 @@ jQuery(document).ready(function()
         update_editor_height();
     });
     
-    jQuery("#maintabs").tabs();
+    jQuery("#maintabs").tabs(
+    {
+        activate: function(event)
+        {
+            update_editor_height();
+        }
+    });
 });
