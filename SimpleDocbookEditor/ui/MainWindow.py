@@ -43,8 +43,9 @@ class MainWindow(object):
         
         self._window.set_title(_(APPNAME))
         
-        self._window.set_size_request(640, 480)
-        self._window.maximize()
+        self._window.set_size_request(self._application.config["UI/width"], self._application.config["UI/height"])
+        if self._application.config["UI/maximized"]:
+            self._window.maximize()
         
         self._webview = webkit.WebView()
         builder.get_object("webview_container").add(self._webview)

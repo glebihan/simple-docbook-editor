@@ -63,3 +63,4 @@ debian/python-module-stampdir/
 debian/*.debhelper
 debian/*.substvars
 debian/simple-docbook-editor
+debug_config.conf

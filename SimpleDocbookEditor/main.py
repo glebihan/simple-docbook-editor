@@ -21,10 +21,12 @@
 
 from ui.MainWindow import MainWindow
 from DocBookObject import DocBookObject
+from AppConfig import AppConfig
 import gtk
 import logging
 import optparse
 import os
+from informations import *
 
 DEBUG_LEVELS = {
    0: logging.FATAL,
@@ -37,20 +39,26 @@ DEBUG_LEVELS = {
 class SimpleDocbookEditor(object):
     def __init__(self):
         self._parse_cli_options()
+        self._load_config()
         self._init_logger()
         
         self.book = None
         
         self._window = MainWindow(self)
     
+    def _load_config(self):
+        self.config = AppConfig(self.cli_options.config_file)
+    
     def _parse_cli_options(self):
         optparser = optparse.OptionParser()
         optparser.add_option("--share-dir", dest = "share_dir", default = "/usr/share")
+        optparser.add_option('-c', '--config-file', dest = "config_file", default = os.path.join(os.getenv("HOME"), ".config", UNIX_APPNAME, UNIX_APPNAME + ".conf"))
         optparser.add_option("--section-id", dest = "section_id", type = "int", default = 0)
         optparser.add_option("-d", "--debug-level", dest = "debug_level", type = "int", default = 2)
         self.cli_options, self.files_to_open = optparser.parse_args()
         
         self.cli_options.share_dir = os.path.realpath(self.cli_options.share_dir)
+        self.cli_options.config_file = os.path.realpath(self.cli_options.config_file)
             
     def _init_logger(self):
         logging.getLogger().setLevel(DEBUG_LEVELS[self.cli_options.debug_level])
