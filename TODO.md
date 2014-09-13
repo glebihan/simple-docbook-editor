@@ -11,4 +11,4 @@ Handle TinyMCE inline styles
 
 Handle errors when parsing contents from both editors
 
-Handle docbook-section-id in source editor
+Fix insert subsection plugin

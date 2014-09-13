@@ -97,7 +97,8 @@ DOCBOOK_TO_HTML_PROPS = {
     "url": "href",
     "fileref": "src",
     "id": "id",
-    "width": "width"
+    "width": "width",
+    "data-section-id": "data-section-id"
 }
 HTML_TO_DOCBOOK_NODES = {
     "p": "para",
@@ -125,13 +126,14 @@ HTML_TO_DOCBOOK_PROPS = {
     "id": "id",
     "href": "url",
     "width": "width",
-    "src": "fileref"
+    "src": "fileref",
+    "data-section-id": "data-section-id"
 }
 
 libxml2.registerErrorHandler(lambda f, ctx: None, None)
 
 class DocBookObject(object):
-    def __init__(self, parent = None, **params):
+    def __init__(self, parent = None, object_id = None, **params):
         global OBJECT_IDS
         
         self._parent = parent
@@ -144,8 +146,11 @@ class DocBookObject(object):
         self._already_warned_unconverted_docbook_prop = []
         self._already_warned_unconverted_html_prop = []
         
-        OBJECT_IDS += 1
-        self.object_id = OBJECT_IDS
+        if object_id:
+            self.object_id = object_id
+        else:
+            OBJECT_IDS += 1
+            self.object_id = OBJECT_IDS
         
         self._children = []
         
@@ -174,6 +179,8 @@ class DocBookObject(object):
     
     def _load_from_xml_object(self, xml_object):
         self._xml_root = xml_object
+        if self._xml_root.name == "chapter" or self._xml_root.name.startswith("sect"):
+            self._xml_root.setProp("data-section-id", str(self.object_id))
         new_children = []
         if xml_object.children:
             child = xml_object.children
@@ -189,7 +196,11 @@ class DocBookObject(object):
                     if already_loaded_child:
                         new_children.append(already_loaded_child)
                     else:
-                        new_children.append(DocBookObject(self, xml_object = child))
+                        if child.prop("data-section-id"):
+                            object_id = int(child.prop("data-section-id"))
+                        else:
+                            object_id = None
+                        new_children.append(DocBookObject(self, xml_object = child, object_id = object_id))
                 child = child.next
         self._children = new_children
     
@@ -437,7 +448,6 @@ class DocBookObject(object):
         
         html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[self._xml_root.name])
         html_node.newProp("data-docbook-type", self._xml_root.name)
-        html_node.newProp("data-section-id", str(self.object_id))
         self._docbook_to_html_process_properties(self._xml_root, html_node)
         if root:
             for i in self._children:
