@@ -44,7 +44,8 @@ class MainWindow(object):
         self._window.set_title(_(APPNAME))
         
         self._window.set_size_request(self._application.config["UI/width"], self._application.config["UI/height"])
-        if self._application.config["UI/maximized"]:
+        self._maximized = self._application.config["UI/maximized"]
+        if self._maximized:
             self._window.maximize()
         
         self._webview = webkit.WebView()
@@ -70,6 +71,30 @@ class MainWindow(object):
         self._about_dialog = AboutDialog(self._window)
         self._save_quit_dialog = SaveQuitDialog(self._window)
         self._image_browser_dialog = ImageBrowserDialog(self._application, self._window)
+        
+        self._mapped = False
+        self._window.connect("size-allocate", self._on_size_allocate)
+        self._window.connect("window-state-event", self._on_window_state_event)
+        self._window.connect("map-event", self._on_map_event)
+    
+    def _on_map_event(self, window, event):
+        self._mapped = True
+        self._window.connect("size-allocate", self._on_size_allocate)
+        self._window.connect("window-state-event", self._on_window_state_event)
+    
+    def _on_window_state_event(self, window, event):
+        if self._mapped:
+            self._maximized = (event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED != 0)
+    
+    def _on_size_allocate(self, window, rectangle):
+        if self._mapped:
+            if self._maximized:
+                self._application.config["UI/maximized"] = True
+            else:
+                self._application.config["UI/maximized"] = False
+                width, height = self._window.get_size()
+                self._application.config["UI/width"] = width
+                self._application.config["UI/height"] = height
     
     def _check_quit(self):
         if self._application.book and self._application.book.changed:
