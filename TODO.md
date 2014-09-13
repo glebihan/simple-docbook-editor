@@ -7,4 +7,6 @@ Handle footnotes
 
 Automatically insert ```<para>``` inside ```<listitem>``` ?
 
-Allow source modifications
+Handle TinyMCE inline styles
+
+Handle errors when parsing contents from both editors

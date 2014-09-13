@@ -447,11 +447,30 @@ class DocBookObject(object):
     def update_from_html(self, html):
         assert (self.edit_mode == "html")
         
-        html_doc = libxml2.htmlParseDoc(html, "utf-8")
-        new_xml_node = self._html_to_docbook(html_doc.getRootElement())
-        self._xml_root.addNextSibling(new_xml_node)
-        self._xml_root.unlinkNode()
-        self._load_from_xml_object(new_xml_node)
+        try:
+            html_doc = libxml2.htmlParseDoc(html, "utf-8")
+            new_xml_node = self._html_to_docbook(html_doc.getRootElement())
+            self._xml_root.addNextSibling(new_xml_node)
+            self._xml_root.unlinkNode()
+            self._load_from_xml_object(new_xml_node)
+        except:
+            #TODO
+            pass
+    
+    def update_from_xml(self, xml):
+        try:
+            xml_doc = libxml2.parseDoc(xml)
+            new_xml_node = xml_doc.getRootElement()
+            if self.filename:
+                self._xml_document = xml_doc
+                self._xml_root = new_xml_node
+            else:
+                self._xml_root.addNextSibling(new_xml_node)
+                self._xml_root.unlinkNode()
+            self._load_from_xml_object(new_xml_node)
+        except:
+            #TODO
+            pass
     
     def save(self):
         self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)

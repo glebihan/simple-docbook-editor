@@ -188,6 +188,13 @@ class MainWindow(object):
             section = self._application.book.find_section_by_id(section_id)
             section.update_from_html(contents)
             self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
+        elif command == "set_section_source_contents":
+            i = params.index(":")
+            section_id = int(params[:i])
+            contents = params[i+1:]
+            section = self._application.book.find_section_by_id(section_id)
+            section.update_from_xml(contents)
+            self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
         elif command == "browse_image":
             i = params.index(":")
             field_name = params[:i] 

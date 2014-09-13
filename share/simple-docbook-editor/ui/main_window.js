@@ -3,6 +3,7 @@ var selected_doc_section = null;
 var edited_section_id = 0;
 var edited_section_node = null;
 var saveTimeout = null;
+var sourceSaveTimeout = null;
 var current_file_browser_window = null;
 var source_editor = null;
 
@@ -89,6 +90,20 @@ function save_editor_contents()
         clearTimeout(saveTimeout);
     }
     saveTimeout = setTimeout(do_save_editor_contents, 300);
+}
+
+function do_save_source_editor_contents()
+{
+    alert("set_section_source_contents:" + edited_section_id + ":" + source_editor.getValue());
+}
+
+function save_source_editor_contents()
+{
+    if (sourceSaveTimeout)
+    {
+        clearTimeout(sourceSaveTimeout);
+    }
+    sourceSaveTimeout = setTimeout(do_save_source_editor_contents, 300);
 }
 
 function set_file_browser_filename(data)
@@ -195,6 +210,10 @@ jQuery(document).ready(function()
         lineNumbers: true,
         indentUnit: 4
     });
+    source_editor.on("change", function(editor, event)
+    {
+        save_source_editor_contents();
+    });
     
     jQuery(window).resize(function(event)
     {
@@ -206,6 +225,7 @@ jQuery(document).ready(function()
         activate: function(event)
         {
             update_editor_height();
+            load_doc_section(edited_section_id);
         }
     });
 });
