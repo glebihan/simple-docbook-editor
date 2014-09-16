@@ -1,7 +1,7 @@
 TODO
 =====================
 
-Handle entities declaration
+Hide HTML editor when edit_mode is not HTML
 
 Handle footnotes
 

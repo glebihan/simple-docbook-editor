@@ -173,10 +173,7 @@ class MainWindow(object):
         elif command == "load_doc_section":
             section_id = int(params)
             section = self._application.book.find_section_by_id(section_id)
-            if section.filename:
-                xml = section.get_document()
-            else:
-                xml = section.get_xml_node()
+            xml = section.get_xml_text()
             if section.edit_mode == "html":
                 self.send_command("set_edit_data(%s)" % json.dumps({"section_id": section_id, "edit_mode": section.edit_mode, "html": str(section.get_html()), "xml": str(xml)}))
             else:

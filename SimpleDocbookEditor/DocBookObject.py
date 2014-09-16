@@ -174,7 +174,9 @@ class DocBookObject(object):
     def _load_from_file(self):
         logging.debug("Parsing file %s" % self.filename)
         
-        self._xml_document = libxml2.parseFile(self.filename)
+        with open(self.filename) as fd:
+            self._xml_text = fd.read()
+        self._xml_document = libxml2.parseDoc(self._xml_text)
         self._load_from_xml_object(self._xml_document.getRootElement())
     
     def _load_from_xml_object(self, xml_object):
@@ -203,6 +205,8 @@ class DocBookObject(object):
                         new_children.append(DocBookObject(self, xml_object = child, object_id = object_id))
                 child = child.next
         self._children = new_children
+        if not self.filename:
+            self._xml_text = str(self._xml_root)
     
     def _get_element_type(self):
         return self._xml_root.name
@@ -474,12 +478,17 @@ class DocBookObject(object):
             self._xml_root.addNextSibling(new_xml_node)
             self._xml_root.unlinkNode()
             self._load_from_xml_object(new_xml_node)
+            if self.filename:
+                self._xml_text = str(self._xml_document)
+            else:
+                self._xml_text = str(self._xml_root)
         except:
             #TODO
             pass
     
     def update_from_xml(self, xml):
         try:
+            self._xml_text = xml
             xml_doc = libxml2.parseDoc(xml)
             new_xml_node = xml_doc.getRootElement()
             if self.filename:
@@ -494,7 +503,9 @@ class DocBookObject(object):
             pass
     
     def save(self):
-        self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)
+        #~ self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)
+        with open(self.filename, "w") as fd:
+            fd.write(self._xml_text)
         for i in self._children:
             if i.filename:
                 i.save()
@@ -524,3 +535,6 @@ class DocBookObject(object):
         assert(hasattr(self, "_xml_document"))
         
         return self._xml_document
+    
+    def get_xml_text(self):
+        return self._xml_text
