@@ -51,8 +51,17 @@ function set_edit_data(edit_data)
 {
     if (edit_data.edit_mode == "html")
     {
+        jQuery("#maintabs").tabs("enable", 0);
         edited_section_node = jQuery(edit_data.html);
         tinymce.get("tinymcecontainer").setContent(edited_section_node.html());
+    }
+    else
+    {
+        if (jQuery("#maintabs").tabs("option", "active") != 1)
+        {
+            jQuery("#maintabs").tabs("option", "active", 1);
+        }
+        jQuery("#maintabs").tabs("disable", 0);
     }
     edited_section_id = edit_data.section_id;
     selected_doc_section = edit_data.section_id;

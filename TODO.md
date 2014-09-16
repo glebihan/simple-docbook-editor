@@ -1,7 +1,7 @@
 TODO
 =====================
 
-Hide HTML editor when edit_mode is not HTML
+Remove data-section-id props from generated XML
 
 Handle footnotes
 
