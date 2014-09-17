@@ -162,7 +162,8 @@ function show_alert(mesg)
     };
     jQuery(dialog).dialog({
         title: "Error",
-        buttons: buttons
+        buttons: buttons,
+        modal: true
     });
 }
 
