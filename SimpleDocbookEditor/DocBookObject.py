@@ -205,8 +205,11 @@ class DocBookObject(object):
                         new_children.append(DocBookObject(self, xml_object = child, object_id = object_id))
                 child = child.next
         self._children = new_children
-        if not self.filename:
-            self._xml_text = str(self._xml_root)
+        if self.edit_mode == "html":
+            if self.filename:
+                self._xml_text = str(self._xml_document)
+            else:
+                self._xml_text = str(self._xml_root)
     
     def _get_element_type(self):
         return self._xml_root.name
@@ -502,18 +505,38 @@ class DocBookObject(object):
             #TODO
             pass
     
+    def _remove_data_section_id(self, node):
+        if node.prop("data-section-id"):
+            node.unsetProp("data-section-id")
+        child = node.children
+        while child:
+            self._remove_data_section_id(child)
+            child = child.next
+    
+    def _cleanup_xml_text(self):
+        doc = self._xml_document.copyDoc(True)
+        self._remove_data_section_id(doc)
+        return str(doc)
+    
     def save(self):
-        #~ self._xml_document.saveFormatFileEnc(self.filename, "utf-8", True)
+        if self.edit_mode == "html":
+            xml_text = self._cleanup_xml_text()
+        else:
+            xml_text = self._xml_text
         with open(self.filename, "w") as fd:
-            fd.write(self._xml_text)
+            fd.write(xml_text)
         for i in self._children:
             if i.filename:
                 i.save()
         self.store_saved_state()
     
     def _get_content_hash(self):
+        if self.edit_mode == "html":
+            xml_text = self._cleanup_xml_text()
+        else:
+            xml_text = self._xml_text
         md5 = hashlib.md5()
-        md5.update(str(self._xml_root))
+        md5.update(xml_text)
         hashsum = md5.digest()
         for i in self._children:
             if i.filename:

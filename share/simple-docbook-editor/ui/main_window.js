@@ -178,7 +178,10 @@ jQuery(document).ready(function()
             });
             editor.on('change', function(e)
             {
-                save_editor_contents();
+                if (jQuery("#maintabs").tabs("option", "active") == 0)
+                {
+                    save_editor_contents();
+                }
             });
             editor.on('init', function(e)
             {
@@ -221,7 +224,10 @@ jQuery(document).ready(function()
     });
     source_editor.on("change", function(editor, event)
     {
-        save_source_editor_contents();
+        if (jQuery("#maintabs").tabs("option", "active") == 1)
+        {
+            save_source_editor_contents();
+        }
     });
     
     jQuery(window).resize(function(event)
