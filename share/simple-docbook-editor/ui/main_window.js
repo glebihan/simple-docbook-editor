@@ -27,6 +27,7 @@ var saveTimeout = null;
 var sourceSaveTimeout = null;
 var current_file_browser_window = null;
 var source_editor = null;
+var parsing_error = null;
 
 function reload_doc_structure()
 {
@@ -145,6 +146,26 @@ function set_file_browser_filename(data)
     current_file_browser_window.document.getElementById(data.field_name).value = data.url;
 }
 
+function set_parsing_error(error)
+{
+    parsing_error = error;
+}
+
+function show_alert(mesg)
+{
+    var dialog = jQuery("<div/>");
+    dialog.html(mesg);
+    var buttons = {};
+    buttons["OK"] = function()
+    {
+        jQuery(this).dialog("close");
+    };
+    jQuery(dialog).dialog({
+        title: "Error",
+        buttons: buttons
+    });
+}
+
 jQuery(document).ready(function()
 {
     jQuery('#doc_structure').tree(
@@ -154,6 +175,11 @@ jQuery(document).ready(function()
         dragAndDrop: false,
         onCanSelectNode: function(node)
         {
+            if (parsing_error && node.id != edited_section_id)
+            {
+                show_alert(parsing_error);
+                return false;
+            }
             return (node.edit_mode != null);
         }
     });
@@ -196,9 +222,16 @@ jQuery(document).ready(function()
             {
                 if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
                 {
-                    selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
-                    load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
-                    reload_doc_structure();
+                    if (parsing_error)
+                    {
+                        show_alert(parsing_error);
+                    }
+                    else
+                    {
+                        selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
+                        load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
+                        reload_doc_structure();
+                    }
                 }
             });
             editor.on('change', function(e)

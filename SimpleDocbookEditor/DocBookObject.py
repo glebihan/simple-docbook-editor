@@ -24,6 +24,7 @@ import os
 import logging
 import urlparse
 import hashlib
+import sys
 
 OBJECT_IDS = 0
 
@@ -330,12 +331,6 @@ class DocBookObject(object):
             return res
         elif xml_node.name in DOCBOOK_TO_HTML_NODES or xml_node.name in ["emphasis"]:
             res = self._docbook_to_html(xml_node)
-            #~ if xml_node.name == "figure":
-                #~ title_nodes = self._find_nodes(xml_node, "title", 1)
-                #~ if len(title_nodes) == 1:
-                    #~ img_nodes = self._find_nodes(res, "img")
-                    #~ if len(img_nodes) == 1:
-                        #~ img_nodes[0].setProp("alt", title_nodes[0].getContent())
             self._docbook_to_html_process_properties(xml_node, res)
             return res
         elif xml_node.name in DOCBOOK_JUMP_NODES:
@@ -387,8 +382,6 @@ class DocBookObject(object):
     def _html_to_docbook_node(self, html_node):
         if html_node.name == "text":
             return html_node.copyNode(False)
-        #~ elif html_node.type == "entity_ref":
-            #~ return libxml2.newText(str(html_node))
         elif html_node.prop("data-docbook-type") == "footnote":
             res = libxml2.newNode("footnote")
             child = libxml2.htmlParseDoc(html_node.prop("data-footnote"), "utf-8").getRootElement().children.children
@@ -514,8 +507,7 @@ class DocBookObject(object):
             else:
                 self._xml_text = str(self._xml_root)
         except:
-            #TODO
-            pass
+            return sys.exc_info()
     
     def update_from_xml(self, xml):
         try:
@@ -530,8 +522,7 @@ class DocBookObject(object):
                 self._xml_root.unlinkNode()
             self._load_from_xml_object(new_xml_node)
         except:
-            #TODO
-            pass
+            return sys.exc_info()
     
     def _remove_data_section_id(self, node):
         if node.prop("data-section-id"):

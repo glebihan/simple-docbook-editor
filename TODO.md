@@ -7,4 +7,8 @@ Automatically insert ```<para>``` inside ```<listitem>``` ?
 
 Handle TinyMCE inline styles
 
-Handle errors when parsing contents from both editors
+Implement global undo/redo
+
+Translations in JS
+
+Give details about parsing errors

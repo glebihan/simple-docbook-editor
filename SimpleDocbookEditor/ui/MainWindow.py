@@ -183,14 +183,24 @@ class MainWindow(object):
             section_id = int(params[:i])
             contents = params[i+1:]
             section = self._application.book.find_section_by_id(section_id)
-            section.update_from_html(contents)
+            parsing_error = section.update_from_html(contents)
+            if parsing_error:
+                parsing_error_json = json.dumps(_("You have an error in your document. Please fix it before editing another section."))
+            else:
+                parsing_error_json = json.dumps(None)
+            self.send_command("set_parsing_error(%s)" % parsing_error_json)
             self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
         elif command == "set_section_source_contents":
             i = params.index(":")
             section_id = int(params[:i])
             contents = params[i+1:]
             section = self._application.book.find_section_by_id(section_id)
-            section.update_from_xml(contents)
+            parsing_error = section.update_from_xml(contents)
+            if parsing_error:
+                parsing_error_json = json.dumps(_("You have an error in your document. Please fix it before editing another section."))
+            else:
+                parsing_error_json = json.dumps(None)
+            self.send_command("set_parsing_error(%s)" % parsing_error_json)
             self.send_command("set_doc_structure(%s)" % json.dumps(self._application.book.get_structure_tree()))
         elif command == "browse_image":
             i = params.index(":")
