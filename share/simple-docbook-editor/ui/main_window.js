@@ -63,6 +63,10 @@ function set_edit_data(edit_data)
         }
         jQuery("#maintabs").tabs("disable", 0);
     }
+    if (edited_section_id != edit_data.section_id && edit_data.edit_mode == "html")
+    {
+        tinymce.get("tinymcecontainer").undoManager.clear();
+    }
     edited_section_id = edit_data.section_id;
     selected_doc_section = edit_data.section_id;
     update_editor_height();
