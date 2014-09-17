@@ -68,7 +68,9 @@ DOCBOOK_TO_HTML_NODES = {
     "row": "tr",
     "entry": "td",
     "ulink": "a",
-    "imagedata": "img"
+    "imagedata": "img",
+    "subscript": "sub",
+    "superscript": "sup"
 }
 DOCBOOK_ELEMENT_TYPE_TO_CLASS = [
     "chapter",
@@ -117,7 +119,9 @@ HTML_TO_DOCBOOK_NODES = {
     "figcaption": "title",
     "img": "imagedata",
     "strong": "emphasis",
-    "em": "emphasis"
+    "em": "emphasis",
+    "sub": "subscript",
+    "sup": "superscript"
 }
 HTML_JUMP_NODES = [
     "body",

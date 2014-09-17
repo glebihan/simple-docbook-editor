@@ -257,7 +257,7 @@ jQuery(document).ready(function()
         menubar: false,
         statusbar: false,
         plugins: ["code image noneditable docbook_subsections"],
-        toolbar: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | formatselect fontselect fontsizeselect | cut copy paste | bullist numlist | outdent indent | blockquote | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
+        toolbar: "bold italic underline strikethrough | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
         relative_urls: false,
         content_style: (
             'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
