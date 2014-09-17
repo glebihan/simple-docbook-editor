@@ -405,7 +405,9 @@ class DocBookObject(object):
             res = self._html_to_docbook(html_node)
             self._html_to_docbook_process_properties(html_node, res)
             return res
-        elif html_node.name in HTML_JUMP_NODES:
+        else:
+            if not html_node.name in HTML_JUMP_NODES:
+                self._warn_unconverted_html_node_type(html_node.name)
             res = []
             subchild = html_node.children
             while subchild:
@@ -416,9 +418,6 @@ class DocBookObject(object):
                     res.append(xml_child)
                 subchild = subchild.next
             return res
-        else:
-            self._warn_unconverted_html_node_type(html_node.name)
-            return None
     
     def _html_to_docbook(self, html_node):
         if html_node.name == "html":
