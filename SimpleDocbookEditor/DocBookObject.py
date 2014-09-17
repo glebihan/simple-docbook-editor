@@ -316,6 +316,18 @@ class DocBookObject(object):
             return xml_node.copyNode(False)
         elif xml_node.type == "entity_ref":
             return libxml2.newText(str(xml_node))
+        elif xml_node.name == "footnote":
+            res = libxml2.newNode("sup")
+            res.newProp("data-docbook-type", "footnote")
+            footnote_content = ""
+            child = xml_node.children
+            while child:
+                footnote_content += str(self._docbook_to_html(child))
+                child = child.next
+            res.newProp("data-footnote", footnote_content)
+            res.newProp("class", "footnote mceNonEditable")
+            res.addChild(libxml2.newText(_("footnote")))
+            return res
         elif xml_node.name in DOCBOOK_TO_HTML_NODES or xml_node.name in ["emphasis"]:
             res = self._docbook_to_html(xml_node)
             #~ if xml_node.name == "figure":
@@ -339,7 +351,9 @@ class DocBookObject(object):
             return res
         else:
             self._warn_unconverted_docbook_node_type(xml_node.name)
-            return None
+            res = self._docbook_to_html(xml_node)
+            self._docbook_to_html_process_properties(xml_node, res)
+            return res
     
     def _docbook_to_html(self, xml_node, is_root = False):
         if xml_node.name == "title" and xml_node.parent.name == "figure":
@@ -350,7 +364,11 @@ class DocBookObject(object):
             else:
                 html_node = libxml2.newNode("em")
         else:
-            html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
+            if xml_node.name in DOCBOOK_TO_HTML_NODES:
+                html_node = libxml2.newNode(DOCBOOK_TO_HTML_NODES[xml_node.name])
+            else:
+                html_node = libxml2.newNode("span")
+                html_node.newProp("data-docbook-type", xml_node.name)
         self._docbook_to_html_process_properties(xml_node, html_node)
         if xml_node.name in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             html_node.newProp("class", xml_node.name)
@@ -371,11 +389,19 @@ class DocBookObject(object):
             return html_node.copyNode(False)
         #~ elif html_node.type == "entity_ref":
             #~ return libxml2.newText(str(html_node))
+        elif html_node.prop("data-docbook-type") == "footnote":
+            res = libxml2.newNode("footnote")
+            child = libxml2.htmlParseDoc(html_node.prop("data-footnote"), "utf-8").getRootElement().children.children
+            while child:
+                res.addChild(self._html_to_docbook(child))
+                child = child.next
+            self._html_to_docbook_process_properties(html_node, res)
+            return res
         elif html_node.name in ["div", "span"] and html_node.prop("data-docbook-type") in DOCBOOK_ELEMENT_TYPE_TO_CLASS:
             res = self._html_to_docbook(html_node)
             self._html_to_docbook_process_properties(html_node, res)
             return res
-        elif html_node.name in HTML_TO_DOCBOOK_NODES:
+        elif html_node.name in HTML_TO_DOCBOOK_NODES or html_node.prop("data-docbook-type"):
             res = self._html_to_docbook(html_node)
             self._html_to_docbook_process_properties(html_node, res)
             return res
@@ -404,7 +430,10 @@ class DocBookObject(object):
                     return section.get_xml_node()
             xml_node = libxml2.newNode(html_node.prop("data-docbook-type"))
         else:
-            xml_node = libxml2.newNode(HTML_TO_DOCBOOK_NODES[html_node.name])
+            if html_node.name in HTML_TO_DOCBOOK_NODES:
+                xml_node = libxml2.newNode(HTML_TO_DOCBOOK_NODES[html_node.name])
+            else:
+                xml_node = libxml2.newNode(html_node.prop("data-docbook-type"))
         self._html_to_docbook_process_properties(html_node, xml_node)
         if html_node.name == "table":
             sub_xml_node = libxml2.newNode("tgroup")

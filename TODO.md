@@ -1,7 +1,7 @@
 TODO
 =====================
 
-Handle footnotes
+Allow editing footnotes
 
 Automatically insert ```<para>``` inside ```<listitem>``` ?
 
