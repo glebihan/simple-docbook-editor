@@ -263,7 +263,7 @@ jQuery(document).ready(function()
         content_style: (
             'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
         ),
-        object_resizing: "img,table",
+        object_resizing: "img,table,sup.footnote",
         file_browser_callback: function(field_name, url, type, win)
         {
             current_file_browser_window = win;

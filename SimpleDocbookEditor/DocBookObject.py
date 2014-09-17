@@ -482,7 +482,10 @@ class DocBookObject(object):
         html_node.newProp("data-docbook-type", self._xml_root.name)
         self._docbook_to_html_process_properties(self._xml_root, html_node)
         if root:
+            last_child = None
             for i in self._children:
+                if i.get_xml_node().name != "text":
+                    last_child = i
                 if (i.element_type in ["chapter"] or i.element_type.startswith("sect")):
                     child_node = i.get_html(False)
                 else:
@@ -491,6 +494,8 @@ class DocBookObject(object):
                     child_node = [child_node]
                 for j in child_node:
                     html_node.addChild(j)
+            if last_child and (last_child.get_xml_node().name == "chapter" or last_child.get_xml_node().name.startswith("sect")):
+                html_node.addChild(libxml2.newNode("p"))
         else:
             html_node.newProp("class", "subsection %s mceNonEditable" % self._xml_root.name)
             html_node.addChild(libxml2.newText("Subsection (%s) \"%s\"" % (self._xml_root.name, self.title)))

@@ -35,7 +35,7 @@ tinymce.PluginManager.add('docbook_subsections', function(editor)
         {
             new_section_type = "sect" + (parseInt(current_section_type.substring(4)) + 1);
         }
-        editor.selection.setContent(editor.dom.createHTML("div", {class: "subsection " + new_section_type + " mceNonEditable", "data-docbook-type": new_section_type}, "<h1>New section</h1>") + editor.dom.createHTML("p", {}, "&nbsp;"));
+        editor.selection.setContent(editor.dom.createHTML("div", {class: "subsection " + new_section_type + " mceNonEditable", "data-docbook-type": new_section_type}, "<h1>New section</h1>"));
         do_save_editor_contents();
         reload_doc_structure();
         load_doc_section(edited_section_id);
