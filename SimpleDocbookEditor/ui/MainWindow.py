@@ -215,6 +215,8 @@ class MainWindow(object):
                 self.send_command("set_file_browser_filename(%s)" % json.dumps({"field_name": field_name, "url": urlparse.urljoin('file:', urllib.pathname2url(new_filename))}))
         elif command == "load_config":
             self._do_send_command("set_config(%s)" % json.dumps(self._application.config.serialize()))
+        elif command == "translate":
+            self.send_command("set_translation(%s)" % json.dumps({"mesg": params, "translation": _(params)}))
         else:
             return False
             

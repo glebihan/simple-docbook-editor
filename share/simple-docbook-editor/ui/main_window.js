@@ -30,6 +30,22 @@ var source_editor = null;
 var parsing_error = null;
 var app_config = {};
 var first_config_load = true;
+var translations = {};
+
+function _(mesg)
+{
+    if (!translations[mesg])
+    {
+        alert("translate:" + mesg);
+    }
+    console.log(mesg + ":" + translations[mesg]);
+    return (translations[mesg] ? translations[mesg] : mesg);
+}
+
+function set_translation(data)
+{
+    translations[data.mesg] = data.translation;
+}
 
 function reload_doc_structure()
 {
@@ -158,12 +174,12 @@ function show_alert(mesg)
     var dialog = jQuery("<div/>");
     dialog.html(mesg);
     var buttons = {};
-    buttons["OK"] = function()
+    buttons[_("OK")] = function()
     {
         jQuery(this).dialog("close");
     };
     jQuery(dialog).dialog({
-        title: "Error",
+        title: _("Error"),
         buttons: buttons,
         modal: true
     });
