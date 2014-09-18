@@ -23,14 +23,14 @@ import ConfigParser
 import os
 
 CONFIG_TYPES = {
-    "Source Editor/lineWrapping": bool,
+    "Source Editor/linewrapping": bool,
     "UI/maximized": bool,
     "UI/width": int,
     "UI/height": int
 }
 
 DEFAULT_VALUES = {
-    "Source Editor/lineWrapping": False,
+    "Source Editor/linewrapping": False,
     "UI/maximized": True,
     "UI/width": 800,
     "UI/height": 600
@@ -70,7 +70,11 @@ class AppConfig(object):
         section, option, key = self._split_key(key)
         if not self._config_parser.has_section(section):
             self._config_parser.add_section(section)
-        self._config_parser.set(section, option, value)
+        conf_type = CONFIG_TYPES.setdefault(key, None)
+        if conf_type == bool:
+            self._config_parser.set(section, option, str(value).lower())
+        else:
+            self._config_parser.set(section, option, value)
         self._save()
     
     def _rec_mkdir(self, path):
@@ -84,3 +88,11 @@ class AppConfig(object):
         self._rec_mkdir(os.path.split(self._config_file)[0])
         with open(self._config_file, "wb") as fd:
             self._config_parser.write(fd)
+    
+    def serialize(self):
+        res = {}
+        for section in self._config_parser.sections():
+            res[section] = {}
+            for option in self._config_parser.options(section):
+                res[section][option] = self["%s/%s" % (section, option)]
+        return res

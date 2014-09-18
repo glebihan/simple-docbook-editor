@@ -213,6 +213,8 @@ class MainWindow(object):
             new_filename = self._image_browser_dialog.run(filename)
             if new_filename:
                 self.send_command("set_file_browser_filename(%s)" % json.dumps({"field_name": field_name, "url": urlparse.urljoin('file:', urllib.pathname2url(new_filename))}))
+        elif command == "load_config":
+            self._do_send_command("set_config(%s)" % json.dumps(self._application.config.serialize()))
         else:
             return False
             

@@ -28,6 +28,8 @@ var sourceSaveTimeout = null;
 var current_file_browser_window = null;
 var source_editor = null;
 var parsing_error = null;
+var app_config = {};
+var first_config_load = true;
 
 function reload_doc_structure()
 {
@@ -167,139 +169,151 @@ function show_alert(mesg)
     });
 }
 
-jQuery(document).ready(function()
+function set_config(config)
 {
-    jQuery('#doc_structure').tree(
+    app_config = config;
+    if (first_config_load)
     {
-        data: [],
-        autoOpen: true,
-        dragAndDrop: false,
-        onCanSelectNode: function(node)
+        first_config_load = false;
+        
+        jQuery('#doc_structure').tree(
         {
-            if (parsing_error && node.id != edited_section_id)
+            data: [],
+            autoOpen: true,
+            dragAndDrop: false,
+            onCanSelectNode: function(node)
             {
-                show_alert(parsing_error);
-                return false;
+                if (parsing_error && node.id != edited_section_id)
+                {
+                    show_alert(parsing_error);
+                    return false;
+                }
+                return (node.edit_mode != null);
             }
-            return (node.edit_mode != null);
-        }
-    });
-    jQuery("#doc_structure").bind('tree.select', function(event)
-    {
-        if (event.node.id != edited_section_id)
+        });
+        jQuery("#doc_structure").bind('tree.select', function(event)
         {
-            selected_doc_section = event.node.id;
-            load_doc_section(event.node.id);
-        }
-    });
-    jQuery("#doc_structure").bind('tree.open', function(event)
-    {
-        var i = doc_structure_closed_nodes.indexOf(event.node.id);
-        while (i != -1){
-            doc_structure_closed_nodes.splice(i, 1);
-            i = doc_structure_closed_nodes.indexOf(event.node.id);
-        }
-    });
-    jQuery("#doc_structure").bind('tree.close', function(event)
-    {
-        doc_structure_closed_nodes.push(event.node.id);
-    });
-    
-    jQuery("#leftbar").resizable(
-    {
-        handles: "e",
-        resize: function(event, ui)
-        {
-            jQuery("#editor_wrapper").css("left", jQuery("#leftbar").outerWidth());
-        }
-    });
-    
-    tinymce.init(
-    {
-        selector: "#tinymcecontainer",
-        setup: function(editor)
-        {
-            editor.on('click', function(e)
+            if (event.node.id != edited_section_id)
             {
-                if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
-                {
-                    if (parsing_error)
-                    {
-                        show_alert(parsing_error);
-                    }
-                    else
-                    {
-                        selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
-                        load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
-                        reload_doc_structure();
-                    }
-                }
-            });
-            editor.on('change', function(e)
-            {
-                if (jQuery("#maintabs").tabs("option", "active") == 0)
-                {
-                    save_editor_contents();
-                }
-            });
-            editor.on('init', function(e)
-            {
-                tinymce.get("tinymcecontainer").getBody().onkeyup = function(event)
-                {
-                    save_editor_contents();
-                }
-                setTimeout(function()
-                {
-                    update_editor_height();
-                    alert("editor_ready");
-                }, 100);
-            });
-        },
-        menubar: false,
-        statusbar: false,
-        plugins: ["code image noneditable docbook_subsections"],
-        toolbar: "bold italic underline strikethrough | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
-        relative_urls: false,
-        content_style: (
-            'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
-        ),
-        object_resizing: "img,table,sup.footnote",
-        file_browser_callback: function(field_name, url, type, win)
-        {
-            current_file_browser_window = win;
-            if (type == "image")
-            {
-                alert("browse_image:" + field_name + ":" + url);
+                selected_doc_section = event.node.id;
+                load_doc_section(event.node.id);
             }
-        }
-    });
-    
-    source_editor = CodeMirror.fromTextArea(document.getElementById("source_editor"),
-    {
-        mode: 'text/html',
-        autoCloseTags: true,
-        lineNumbers: true,
-        indentUnit: 4
-    });
-    source_editor.on("change", function(editor, event)
-    {
-        if (jQuery("#maintabs").tabs("option", "active") == 1)
+        });
+        jQuery("#doc_structure").bind('tree.open', function(event)
         {
-            save_source_editor_contents();
-        }
-    });
-    
-    jQuery(window).resize(function(event)
-    {
-        update_editor_height();
-    });
-    
-    jQuery("#maintabs").tabs(
-    {
-        activate: function(event)
+            var i = doc_structure_closed_nodes.indexOf(event.node.id);
+            while (i != -1){
+                doc_structure_closed_nodes.splice(i, 1);
+                i = doc_structure_closed_nodes.indexOf(event.node.id);
+            }
+        });
+        jQuery("#doc_structure").bind('tree.close', function(event)
+        {
+            doc_structure_closed_nodes.push(event.node.id);
+        });
+        
+        jQuery("#leftbar").resizable(
+        {
+            handles: "e",
+            resize: function(event, ui)
+            {
+                jQuery("#editor_wrapper").css("left", jQuery("#leftbar").outerWidth());
+            }
+        });
+        
+        tinymce.init(
+        {
+            selector: "#tinymcecontainer",
+            setup: function(editor)
+            {
+                editor.on('click', function(e)
+                {
+                    if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
+                    {
+                        if (parsing_error)
+                        {
+                            show_alert(parsing_error);
+                        }
+                        else
+                        {
+                            selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
+                            load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
+                            reload_doc_structure();
+                        }
+                    }
+                });
+                editor.on('change', function(e)
+                {
+                    if (jQuery("#maintabs").tabs("option", "active") == 0)
+                    {
+                        save_editor_contents();
+                    }
+                });
+                editor.on('init', function(e)
+                {
+                    tinymce.get("tinymcecontainer").getBody().onkeyup = function(event)
+                    {
+                        save_editor_contents();
+                    }
+                    setTimeout(function()
+                    {
+                        update_editor_height();
+                        alert("editor_ready");
+                    }, 100);
+                });
+            },
+            menubar: false,
+            statusbar: false,
+            plugins: ["code image noneditable docbook_subsections"],
+            toolbar: "bold italic underline strikethrough | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
+            relative_urls: false,
+            content_style: (
+                'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
+            ),
+            object_resizing: "img,table,sup.footnote",
+            file_browser_callback: function(field_name, url, type, win)
+            {
+                current_file_browser_window = win;
+                if (type == "image")
+                {
+                    alert("browse_image:" + field_name + ":" + url);
+                }
+            }
+        });
+        
+        source_editor = CodeMirror.fromTextArea(document.getElementById("source_editor"),
+        {
+            mode: 'text/html',
+            autoCloseTags: true,
+            lineNumbers: true,
+            indentUnit: 4,
+            lineWrapping: app_config["Source Editor"].linewrapping
+        });
+        source_editor.on("change", function(editor, event)
+        {
+            if (jQuery("#maintabs").tabs("option", "active") == 1)
+            {
+                save_source_editor_contents();
+            }
+        });
+        
+        jQuery(window).resize(function(event)
         {
             update_editor_height();
-            load_doc_section(edited_section_id);
-        }
-    });
+        });
+        
+        jQuery("#maintabs").tabs(
+        {
+            activate: function(event)
+            {
+                update_editor_height();
+                load_doc_section(edited_section_id);
+            }
+        });
+    }
+}
+
+jQuery(document).ready(function()
+{
+    alert("load_config");
 });
