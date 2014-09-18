@@ -41,6 +41,10 @@ class AppConfig(object):
         self._config_file = config_file
         self._config_parser = ConfigParser.RawConfigParser()
         self._config_parser.read(config_file)
+        
+        # Force all configurations to be present in the serialization
+        for i in DEFAULT_VALUES:
+            self[i] = self[i]
     
     def _split_key(self, key):
         if "/" in key:
