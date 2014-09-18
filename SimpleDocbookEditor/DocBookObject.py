@@ -495,7 +495,7 @@ class DocBookObject(object):
                 for j in child_node:
                     html_node.addChild(j)
             if last_child and (last_child.get_xml_node().name == "chapter" or last_child.get_xml_node().name.startswith("sect")):
-                html_node.addChild(libxml2.newNode("p"))
+                html_node.addChild(libxml2.newNode("br"))
         else:
             html_node.newProp("class", "subsection %s mceNonEditable" % self._xml_root.name)
             html_node.addChild(libxml2.newText("Subsection (%s) \"%s\"" % (self._xml_root.name, self.title)))
