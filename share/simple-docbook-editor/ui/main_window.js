@@ -38,7 +38,6 @@ function _(mesg)
     {
         alert("translate:" + mesg);
     }
-    console.log(mesg + ":" + translations[mesg]);
     return (translations[mesg] ? translations[mesg] : mesg);
 }
 
@@ -280,11 +279,16 @@ function set_config(config)
             },
             menubar: false,
             statusbar: false,
-            plugins: ["code image noneditable docbook_subsections"],
-            toolbar: "bold italic underline strikethrough | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | image | add_docbook_subsection | code",
+            plugins: ["code image noneditable docbook_subsections link"],
+            toolbar: "bold italic underline strikethrough | styleselect | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | link image | add_docbook_subsection | code",
             relative_urls: false,
             content_style: (
-                'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}'
+                'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}' +
+                'span.command {display: block;}' +
+                'span.note {display: block; }' +
+                'span.note:before {content:url(../images/note.png); padding-left: 5px;}' +
+                '.command, .filename, .keycap, .classname, .literal {font-family:"liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight:bold;}' +
+                '.guibutton, .guilabel {font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight: bold;}'
             ),
             object_resizing: "img,table,sup.footnote",
             file_browser_callback: function(field_name, url, type, win)
@@ -294,7 +298,20 @@ function set_config(config)
                 {
                     alert("browse_image:" + field_name + ":" + url);
                 }
-            }
+            },
+            style_formats: [
+                {title: _("command"), inline: "span", classes: "command", attributes: {"data-docbook-type": "command"}},
+                {title: _("guibutton"), inline: "span", classes: "guibutton", attributes: {"data-docbook-type": "guibutton"}},
+                {title: _("guilabel"), inline: "span", classes: "guilabel", attributes: {"data-docbook-type": "guilabel"}},
+                {title: _("guimenu"), inline: "span", classes: "guimenu", attributes: {"data-docbook-type": "guimenu"}},
+                {title: _("guimenuitem"), inline: "span", classes: "guimenuitem", attributes: {"data-docbook-type": "guimenuitem"}},
+                {title: _("guisubmenu"), inline: "span", classes: "guisubmenu", attributes: {"data-docbook-type": "guisubmenu"}},
+                {title: _("keycap"), inline: "span", classes: "keycap", attributes: {"data-docbook-type": "keycap"}},
+                {title: _("keycombo"), inline: "span", classes: "keycombo", attributes: {"data-docbook-type": "keycombo"}},
+                {title: _("note"), inline: "span", classes: "note", attributes: {"data-docbook-type": "note"}},
+                {title: _("replaceable"), inline: "span", classes: "replaceable", attributes: {"data-docbook-type": "replaceable"}},
+                {title: _("wordasword"), inline: "span", classes: "wordasword", attributes: {"data-docbook-type": "wordasword"}}
+            ]
         });
         
         source_editor = CodeMirror.fromTextArea(document.getElementById("source_editor"),
