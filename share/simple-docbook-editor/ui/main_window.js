@@ -285,8 +285,8 @@ function set_config(config)
             content_style: (
                 'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}' +
                 'span.command {display: block;}' +
-                'span.note {display: block; }' +
-                'span.note:before {content:url(../images/note.png); padding-left: 5px;}' +
+                'span.note {display: block; color: black; margin: 0px; padding: 0px; background: none; background-color: white; margin-bottom: 1em; border-bottom: 1px solid #aaaaaa; page-break-inside: avoid;}' +
+                'span.note:before {content:url(images/note.png); padding-left: 5px;}' +
                 '.command, .filename, .keycap, .classname, .literal {font-family:"liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight:bold;}' +
                 '.guibutton, .guilabel {font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight: bold;}'
             ),

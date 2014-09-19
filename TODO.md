@@ -16,3 +16,5 @@ Don't allow saving / closing file when there is a parsing error
 Add missing css styles for docbook-specific objects in TinyMCE
 
 Generate list of docbook-specific objects from python
+
+Fix handling of notes (when they contain <para>)
