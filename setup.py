@@ -21,10 +21,19 @@
 
 from distutils.command.build import build as _build
 from distutils.core import setup
+from distutils.cmd import Command
 import sys, os
 from SimpleDocbookEditor.informations import *
 
-class build(_build):
+class build_tinymce(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
     def run(self):
         # build tinymce
         if os.path.exists("share/simple-docbook-editor/tinymce"):
@@ -47,6 +56,16 @@ class build(_build):
             if os.path.exists("tinymce/js/tinymce/plugins/%s.orig" % custom_plugin):
                 os.system("mv \"tinymce/js/tinymce/plugins/%s.orig\" \"tinymce/js/tinymce/plugins/%s\"" % (custom_plugin, custom_plugin))
 
+class build_jquery(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         # build jquery
         if os.path.exists("share/simple-docbook-editor/jquery"):
             os.system("rm -rf share/simple-docbook-editor/jquery/*")
@@ -57,6 +76,16 @@ class build(_build):
         os.chdir("..")
         os.system("cp jquery/dist/jquery.min.js jquery/LICENSE.txt share/simple-docbook-editor/jquery")
 
+class build_jqueryui(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         # build jquery-ui
         if os.path.exists("share/simple-docbook-editor/jquery-ui"):
             os.system("rm -rf share/simple-docbook-editor/jquery-ui/*")
@@ -68,13 +97,33 @@ class build(_build):
         os.chdir("..")
         os.system("cp -R jquery-ui/dist/* jquery-ui/LICENSE.txt share/simple-docbook-editor/jquery-ui")
 
+class build_jqtree(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         # package jqTree
         if os.path.exists("share/simple-docbook-editor/jqTree"):
             os.system("rm -rf share/simple-docbook-editor/jqTree/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/jqTree")
         os.system("cp -R jqTree/tree.jquery.js jqTree/LICENSE share/simple-docbook-editor/jqTree")
-        
+
+class build_codemirror(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         # package CodeMirror
         if os.path.exists("share/simple-docbook-editor/CodeMirror"):
             os.system("rm -rf share/simple-docbook-editor/CodeMirror/*")
@@ -90,8 +139,20 @@ class build(_build):
         os.system("cp CodeMirror/LICENSE share/simple-docbook-editor/CodeMirror")
         os.system("cp -R CodeMirror/addon/* share/simple-docbook-editor/CodeMirror/addon")
         os.system("cp -R CodeMirror/mode/* share/simple-docbook-editor/CodeMirror/mode")
-        
+
+class build(_build):
+    def run(self):
+        for cmd_name in self.get_sub_commands():
+            self.run_command(cmd_name)
         _build.run(self)
+    
+    sub_commands = [
+        ("build_tinymce", None),
+        ("build_jquery", None),
+        ("build_jqueryui", None),
+        ("build_jqtree", None),
+        ("build_codemirror", None)
+    ]
 
 def list_packages():
     res = ['SimpleDocbookEditor']
@@ -118,7 +179,14 @@ for i in packages:
     package_dir[i] = i.replace(".", "/")
 
 setup(
-    cmdclass = {'build': build},
+    cmdclass = {
+        'build': build,
+        "build_tinymce": build_tinymce,
+        "build_jquery": build_jquery,
+        "build_jqueryui": build_jqueryui,
+        "build_jqtree": build_jqtree,
+        "build_codemirror": build_codemirror
+    },
     name = UNIX_APPNAME,
     version = VERSION,
     author = AUTHORS[0]["name"],
