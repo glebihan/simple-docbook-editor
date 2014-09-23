@@ -22,6 +22,7 @@
 from distutils.command.build import build as _build
 from distutils.core import setup
 from distutils.cmd import Command
+from distutils.errors import DistutilsOptionError
 import sys, os
 from SimpleDocbookEditor.informations import *
 
@@ -140,6 +141,58 @@ class build_codemirror(Command):
         os.system("cp -R CodeMirror/addon/* share/simple-docbook-editor/CodeMirror/addon")
         os.system("cp -R CodeMirror/mode/* share/simple-docbook-editor/CodeMirror/mode")
 
+class build_ckeditor(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        # package ckeditor
+        if os.path.exists("share/simple-docbook-editor/ckeditor"):
+            os.system("rm -rf share/simple-docbook-editor/ckeditor/*")
+        else:
+            os.system("mkdir -p share/simple-docbook-editor/ckeditor")
+        os.chdir("ckeditor")
+        os.system("./dev/builder/build.sh")
+        os.chdir("..")
+        os.system("cp ckeditor/dev/builder/release/ckeditor/ckeditor.js share/simple-docbook-editor/ckeditor")
+
+class build_editor(Command):
+    user_options = [
+        ('editor=', 'e', "editor to build")
+    ]
+    
+    def initialize_options(self):
+        self.editor = 'tinymce'
+
+    def finalize_options(self):
+        if not self.editor in ["ckeditor", "tinymce"]:
+            raise DistutilsOptionError("Supported editors are ckeditor and tinymce")
+
+    def run(self):
+        self.run_command("build_%s" % self.editor)
+        
+        if self.editor == "tinymce":
+            scripts = [
+                "../tinymce/tinymce.min.js",
+                "../tinymce-custom-plugins/docbook_subsections/plugin.js"
+            ]
+        else:
+            scripts = [
+                "../ckeditor/ckeditor.js"
+            ]
+        f = open("share/simple-docbook-editor/ui/main_window.html.in")
+        html_data = f.read().replace("$EDITOR_SCRIPTS$", "\n        ".join(["<script type=\"text/javascript\" src=\"%s\"></script>" % s for s in scripts]))
+        f.close()
+        f = open("share/simple-docbook-editor/ui/main_window.html", "w")
+        f.write(html_data)
+        f.close()
+                
+    
 class build(_build):
     def run(self):
         for cmd_name in self.get_sub_commands():
@@ -151,7 +204,8 @@ class build(_build):
         ("build_jquery", None),
         ("build_jqueryui", None),
         ("build_jqtree", None),
-        ("build_codemirror", None)
+        ("build_codemirror", None),
+        ("build_ckeditor", None)
     ]
 
 def list_packages():
@@ -180,8 +234,10 @@ for i in packages:
 
 setup(
     cmdclass = {
-        'build': build,
+        "build": build,
+        "build_editor": build_editor,
         "build_tinymce": build_tinymce,
+        "build_ckeditor": build_ckeditor,
         "build_jquery": build_jquery,
         "build_jqueryui": build_jqueryui,
         "build_jqtree": build_jqtree,

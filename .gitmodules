@@ -13,3 +13,6 @@
 [submodule "CodeMirror"]
 	path = CodeMirror
 	url = https://github.com/marijnh/CodeMirror.git
+[submodule "ckeditor"]
+	path = ckeditor
+	url = https://github.com/ckeditor/ckeditor-dev.git
