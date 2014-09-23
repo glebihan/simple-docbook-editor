@@ -26,6 +26,8 @@ from distutils.errors import DistutilsOptionError
 import sys, os
 from SimpleDocbookEditor.informations import *
 
+DEFAULT_EDITOR = "tinymce"
+
 class build_tinymce(Command):
     user_options = []
     
@@ -167,7 +169,7 @@ class build_editor(Command):
     ]
     
     def initialize_options(self):
-        self.editor = 'tinymce'
+        self.editor = DEFAULT_EDITOR
 
     def finalize_options(self):
         if not self.editor in ["ckeditor", "tinymce"]:
@@ -207,20 +209,47 @@ class build_editor(Command):
         f = open("share/simple-docbook-editor/ui/main_window.js", "w")
         f.write(html_data)
         f.close()
-                
+
+class update_pot(Command):
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        if not os.path.exists("l10n"):
+            os.mkdir("l10n")
+        os.system("xgettext -o l10n/%s.pot --from-code=utf-8 --package-name=\"%s\" --package-version=\"%s\" --copyright-holder=\"%s\" `find SimpleDocbookEditor -name '*.py'` `find share/simple-docbook-editor -name '*.js'`" % (UNIX_APPNAME, UNIX_APPNAME, VERSION, AUTHORS[0]["name"]))
     
 class build(_build):
+    user_options = _build.user_options + build_editor.user_options
+    
+    def initialize_options(self):
+        _build.initialize_options(self)
+        self.editor = DEFAULT_EDITOR
+    
     def run(self):
         for cmd_name in self.get_sub_commands():
-            self.run_command(cmd_name)
+            if cmd_name == "build_editor":
+                # Special case for the build_editor command, we need to pass it the editor parameter
+                cmd_obj = self.distribution.get_command_obj(cmd_name)
+                cmd_obj.editor = self.editor
+                cmd_obj.ensure_finalized()
+                cmd_obj.run()
+            else:
+                self.run_command(cmd_name)
         _build.run(self)
     
     sub_commands = [
+        ("build_editor", None),
         ("build_jquery", None),
         ("build_jqueryui", None),
         ("build_jqtree", None),
         ("build_codemirror", None),
-        ("build_editor", None)
+        ("update_pot", None)
     ]
 
 def list_packages():
@@ -256,7 +285,8 @@ setup(
         "build_jquery": build_jquery,
         "build_jqueryui": build_jqueryui,
         "build_jqtree": build_jqtree,
-        "build_codemirror": build_codemirror
+        "build_codemirror": build_codemirror,
+        "update_pot": update_pot
     },
     name = UNIX_APPNAME,
     version = VERSION,

@@ -61,6 +61,7 @@ share/simple-docbook-editor/ckeditor
 share/simple-docbook-editor/CodeMirror
 share/simple-docbook-editor/ui/main_window.html
 share/simple-docbook-editor/ui/main_window.js
+l10n/simple-docbook-editor.pot
 debian/files
 debian/python-module-stampdir/
 debian/*.debhelper
