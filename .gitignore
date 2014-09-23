@@ -60,6 +60,7 @@ share/simple-docbook-editor/tinymce
 share/simple-docbook-editor/ckeditor
 share/simple-docbook-editor/CodeMirror
 share/simple-docbook-editor/ui/main_window.html
+share/simple-docbook-editor/ui/main_window.js
 debian/files
 debian/python-module-stampdir/
 debian/*.debhelper

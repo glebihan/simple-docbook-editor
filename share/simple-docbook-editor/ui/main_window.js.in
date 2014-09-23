@@ -19,6 +19,7 @@
  * along with Simple DocBook Editor.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+$BUILD_VARIABLES$
 var doc_structure_closed_nodes = new Array();
 var selected_doc_section = null;
 var edited_section_id = 0;

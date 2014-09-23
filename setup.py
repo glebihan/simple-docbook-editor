@@ -176,6 +176,10 @@ class build_editor(Command):
     def run(self):
         self.run_command("build_%s" % self.editor)
         
+        js_build_variables = {
+            "use_editor": self.editor
+        }
+        
         if self.editor == "tinymce":
             scripts = [
                 "../tinymce/tinymce.min.js",
@@ -185,10 +189,22 @@ class build_editor(Command):
             scripts = [
                 "../ckeditor/ckeditor.js"
             ]
+            
         f = open("share/simple-docbook-editor/ui/main_window.html.in")
         html_data = f.read().replace("$EDITOR_SCRIPTS$", "\n        ".join(["<script type=\"text/javascript\" src=\"%s\"></script>" % s for s in scripts]))
         f.close()
         f = open("share/simple-docbook-editor/ui/main_window.html", "w")
+        f.write(html_data)
+        f.close()
+        
+        js_build_variables_list = []
+        for i in js_build_variables:
+            js_build_variables_list.append("var %s = \"%s\";" % (i, js_build_variables[i]))
+        
+        f = open("share/simple-docbook-editor/ui/main_window.js.in")
+        html_data = f.read().replace("$BUILD_VARIABLES$", "\n".join(js_build_variables_list))
+        f.close()
+        f = open("share/simple-docbook-editor/ui/main_window.js", "w")
         f.write(html_data)
         f.close()
                 
