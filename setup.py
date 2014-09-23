@@ -200,12 +200,11 @@ class build(_build):
         _build.run(self)
     
     sub_commands = [
-        ("build_tinymce", None),
         ("build_jquery", None),
         ("build_jqueryui", None),
         ("build_jqtree", None),
         ("build_codemirror", None),
-        ("build_ckeditor", None)
+        ("build_editor", None)
     ]
 
 def list_packages():
@@ -221,7 +220,7 @@ def list_share_files():
     for dirpath, dirnames, filenames in os.walk('share'):
         dirfileslist = []
         for i in filenames:
-            if not i.endswith("~") and not i.endswith(".bak") and os.path.isfile(os.path.join(dirpath, i)):
+            if not i.endswith("~") and not i.endswith(".bak") and not i.endswith(".in") and os.path.isfile(os.path.join(dirpath, i)):
                 dirfileslist.append(os.path.join(dirpath, i))
         if dirfileslist:
             res.append((dirpath, dirfileslist))
