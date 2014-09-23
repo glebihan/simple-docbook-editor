@@ -23,7 +23,10 @@ from distutils.command.build import build as _build
 from distutils.core import setup
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError
-import sys, os
+from distutils import log
+import sys
+import os
+import commands
 from SimpleDocbookEditor.informations import *
 
 DEFAULT_EDITOR = "tinymce"
@@ -40,6 +43,9 @@ class build_tinymce(Command):
     def run(self):
         # build tinymce
         if os.path.exists("share/simple-docbook-editor/tinymce"):
+            if not is_newer_dir("tinymce", "share/simple-docbook-editor/tinymce"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/tinymce/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/tinymce")
@@ -71,6 +77,9 @@ class build_jquery(Command):
     def run(self):
         # build jquery
         if os.path.exists("share/simple-docbook-editor/jquery"):
+            if not is_newer_dir("jquery", "share/simple-docbook-editor/jquery"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/jquery/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/jquery")
@@ -91,6 +100,9 @@ class build_jqueryui(Command):
     def run(self):
         # build jquery-ui
         if os.path.exists("share/simple-docbook-editor/jquery-ui"):
+            if not is_newer_dir("jquery-ui", "share/simple-docbook-editor/jquery-ui"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/jquery-ui/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/jquery-ui")
@@ -112,6 +124,9 @@ class build_jqtree(Command):
     def run(self):
         # package jqTree
         if os.path.exists("share/simple-docbook-editor/jqTree"):
+            if not is_newer_dir("jqTree", "share/simple-docbook-editor/jqTree"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/jqTree/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/jqTree")
@@ -129,6 +144,9 @@ class build_codemirror(Command):
     def run(self):
         # package CodeMirror
         if os.path.exists("share/simple-docbook-editor/CodeMirror"):
+            if not is_newer_dir("CodeMirror", "share/simple-docbook-editor/CodeMirror"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/CodeMirror/*")
             os.system("mkdir -p share/simple-docbook-editor/CodeMirror/addon")
             os.system("mkdir -p share/simple-docbook-editor/CodeMirror/mode")
@@ -155,6 +173,9 @@ class build_ckeditor(Command):
     def run(self):
         # package ckeditor
         if os.path.exists("share/simple-docbook-editor/ckeditor"):
+            if not is_newer_dir("ckeditor", "share/simple-docbook-editor/ckeditor"):
+                log.info("Nothing to do")
+                return
             os.system("rm -rf share/simple-docbook-editor/ckeditor/*")
         else:
             os.system("mkdir -p share/simple-docbook-editor/ckeditor")
@@ -251,6 +272,11 @@ class build(_build):
         ("build_codemirror", None),
         ("update_pot", None)
     ]
+
+def is_newer_dir(dir1, dir2):
+    ts_dir1 = max([os.path.getmtime(f) for f in commands.getoutput("find \"%s\" -type f" % dir1).splitlines()])
+    ts_dir2 = max([os.path.getmtime(f) for f in commands.getoutput("find \"%s\" -type f" % dir2).splitlines()])
+    return ts_dir1 > ts_dir2
 
 def list_packages():
     res = ['SimpleDocbookEditor']
