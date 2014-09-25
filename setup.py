@@ -182,7 +182,7 @@ class build_ckeditor(Command):
         os.chdir("ckeditor")
         os.system("./dev/builder/build.sh")
         os.chdir("..")
-        os.system("cp ckeditor/dev/builder/release/ckeditor/ckeditor.js share/simple-docbook-editor/ckeditor")
+        os.system("cp -R ckeditor/dev/builder/release/ckeditor/* share/simple-docbook-editor/ckeditor")
 
 class build_editor(Command):
     user_options = [

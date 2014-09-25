@@ -93,7 +93,14 @@ function set_edit_data(edit_data)
     {
         jQuery("#maintabs").tabs("enable", 0);
         edited_section_node = jQuery(edit_data.html);
-        tinymce.get("tinymcecontainer").setContent(edited_section_node.html());
+        if (use_editor == "ckeditor")
+        {
+            CKEDITOR.instances.editorcontainer.setData(edited_section_node.html());
+        }
+        else
+        {
+            tinymce.get("editorcontainer").setContent(edited_section_node.html());
+        }
     }
     else
     {
@@ -105,7 +112,14 @@ function set_edit_data(edit_data)
     }
     if (edited_section_id != edit_data.section_id && edit_data.edit_mode == "html")
     {
-        tinymce.get("tinymcecontainer").undoManager.clear();
+        if (use_editor == "ckeditor")
+        {
+            CKEDITOR.instances.editorcontainer.resetUndo();
+        }
+        else
+        {
+            tinymce.get("editorcontainer").undoManager.clear();
+        }
     }
     edited_section_id = edit_data.section_id;
     selected_doc_section = edit_data.section_id;
@@ -114,13 +128,27 @@ function set_edit_data(edit_data)
 }
 
 function update_editor_height(){
-    jQuery("#tinymcecontainer_ifr").css("height", (jQuery("#editor_inside_wrapper").height() - jQuery("#tinymcecontainer_ifr").offset().top) + "px");
+    if (use_editor == "ckeditor")
+    {
+        CKEDITOR.instances.editorcontainer.resize("100%", jQuery("#editor_inside_wrapper").height() - jQuery("#cke_editorcontainer").offset().top);
+    }
+    else
+    {
+        jQuery("#editorcontainer_ifr").css("height", (jQuery("#editor_inside_wrapper").height() - jQuery("#editorcontainer_ifr").offset().top) + "px");
+    }
     source_editor.setSize(null, jQuery("#editor_inside_wrapper").height() - jQuery("div.CodeMirror").offset().top);
 }
 
 function refresh_view_for_new_book(section_id)
 {
-    tinymce.get("tinymcecontainer").setContent("");
+    if (use_editor == "ckeditor")
+    {
+        CKEDITOR.instances.editorcontainer.setData("");
+    }
+    else
+    {
+        tinymce.get("editorcontainer").setContent("");
+    }
     doc_structure_closed_nodes = new Array();
     selected_doc_section = section_id;
     edited_section_id = 0;
@@ -129,7 +157,14 @@ function refresh_view_for_new_book(section_id)
 
 function do_save_editor_contents()
 {
-    edited_section_node.html(tinymce.get("tinymcecontainer").getContent());
+    if (use_editor == "ckeditor")
+    {
+        edited_section_node.html(CKEDITOR.instances.editorcontainer.getData());
+    }
+    else
+    {
+        edited_section_node.html(tinymce.get("editorcontainer").getContent());
+    }
     if (edited_section_id)
     {
         alert('set_section_contents:' + edited_section_id + ':' + edited_section_node[0].outerHTML);
@@ -237,83 +272,112 @@ function set_config(config)
             }
         });
         
-        tinymce.init(
+        switch (use_editor)
         {
-            selector: "#tinymcecontainer",
-            setup: function(editor)
-            {
-                editor.on('click', function(e)
+            case "ckeditor":
+                CKEDITOR.replace("editorcontainer",
                 {
-                    if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
-                    {
-                        if (parsing_error)
+                    on: {
+                        instanceReady: function()
                         {
-                            show_alert(parsing_error);
-                        }
-                        else
+                            setTimeout(function()
+                            {
+                                update_editor_height();
+                                alert("editor_ready");
+                            }, 100);
+                        },
+                        change: function()
                         {
-                            selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
-                            load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
-                            reload_doc_structure();
+                            if (jQuery("#maintabs").tabs("option", "active") == 0)
+                            {
+                                save_editor_contents();
+                            }
                         }
                     }
                 });
-                editor.on('change', function(e)
+                break;
+            
+            case "tinymce":
+            default:
+                tinymce.init(
                 {
-                    if (jQuery("#maintabs").tabs("option", "active") == 0)
+                    selector: "#editorcontainer",
+                    setup: function(editor)
                     {
-                        save_editor_contents();
-                    }
+                        editor.on('click', function(e)
+                        {
+                            if (jQuery(e.target).hasClass("mceNonEditable") && jQuery(e.target).hasClass("subsection") && parseInt(jQuery(e.target).attr("data-section-id")) > 0)
+                            {
+                                if (parsing_error)
+                                {
+                                    show_alert(parsing_error);
+                                }
+                                else
+                                {
+                                    selected_doc_section = parseInt(jQuery(e.target).attr("data-section-id"));
+                                    load_doc_section(parseInt(jQuery(e.target).attr("data-section-id")));
+                                    reload_doc_structure();
+                                }
+                            }
+                        });
+                        editor.on('change', function(e)
+                        {
+                            if (jQuery("#maintabs").tabs("option", "active") == 0)
+                            {
+                                save_editor_contents();
+                            }
+                        });
+                        editor.on('init', function(e)
+                        {
+                            tinymce.get("editorcontainer").getBody().onkeyup = function(event)
+                            {
+                                save_editor_contents();
+                            }
+                            setTimeout(function()
+                            {
+                                update_editor_height();
+                                alert("editor_ready");
+                            }, 100);
+                        });
+                    },
+                    menubar: false,
+                    statusbar: false,
+                    plugins: ["code image noneditable docbook_subsections link"],
+                    toolbar: "bold italic underline strikethrough | styleselect | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | link image | add_docbook_subsection | code",
+                    relative_urls: false,
+                    content_style: (
+                        'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}' +
+                        'span.command {display: block;}' +
+                        'span.note {display: block; color: black; margin: 0px; padding: 0px; background: none; background-color: white; margin-bottom: 1em; border-bottom: 1px solid #aaaaaa; page-break-inside: avoid;}' +
+                        'span.note:before {content:url(images/note.png); padding-left: 5px;}' +
+                        '.command, .filename, .keycap, .classname, .literal {font-family:"liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight:bold;}' +
+                        '.guibutton, .guilabel {font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight: bold;}'
+                    ),
+                    object_resizing: "img,table,sup.footnote",
+                    file_browser_callback: function(field_name, url, type, win)
+                    {
+                        current_file_browser_window = win;
+                        if (type == "image")
+                        {
+                            alert("browse_image:" + field_name + ":" + url);
+                        }
+                    },
+                    style_formats: [
+                        {title: _("command"), inline: "span", classes: "command", attributes: {"data-docbook-type": "command"}},
+                        {title: _("guibutton"), inline: "span", classes: "guibutton", attributes: {"data-docbook-type": "guibutton"}},
+                        {title: _("guilabel"), inline: "span", classes: "guilabel", attributes: {"data-docbook-type": "guilabel"}},
+                        {title: _("guimenu"), inline: "span", classes: "guimenu", attributes: {"data-docbook-type": "guimenu"}},
+                        {title: _("guimenuitem"), inline: "span", classes: "guimenuitem", attributes: {"data-docbook-type": "guimenuitem"}},
+                        {title: _("guisubmenu"), inline: "span", classes: "guisubmenu", attributes: {"data-docbook-type": "guisubmenu"}},
+                        {title: _("keycap"), inline: "span", classes: "keycap", attributes: {"data-docbook-type": "keycap"}},
+                        {title: _("keycombo"), inline: "span", classes: "keycombo", attributes: {"data-docbook-type": "keycombo"}},
+                        {title: _("note"), inline: "span", classes: "note", attributes: {"data-docbook-type": "note"}},
+                        {title: _("replaceable"), inline: "span", classes: "replaceable", attributes: {"data-docbook-type": "replaceable"}},
+                        {title: _("wordasword"), inline: "span", classes: "wordasword", attributes: {"data-docbook-type": "wordasword"}}
+                    ]
                 });
-                editor.on('init', function(e)
-                {
-                    tinymce.get("tinymcecontainer").getBody().onkeyup = function(event)
-                    {
-                        save_editor_contents();
-                    }
-                    setTimeout(function()
-                    {
-                        update_editor_height();
-                        alert("editor_ready");
-                    }, 100);
-                });
-            },
-            menubar: false,
-            statusbar: false,
-            plugins: ["code image noneditable docbook_subsections link"],
-            toolbar: "bold italic underline strikethrough | styleselect | cut copy paste | bullist numlist | undo redo | removeformat subscript superscript | link image | add_docbook_subsection | code",
-            relative_urls: false,
-            content_style: (
-                'div.subsection {background-color: #B3B3B3; cursor: pointer; padding: 5px; margin-bottom: 10px;}' +
-                'span.command {display: block;}' +
-                'span.note {display: block; color: black; margin: 0px; padding: 0px; background: none; background-color: white; margin-bottom: 1em; border-bottom: 1px solid #aaaaaa; page-break-inside: avoid;}' +
-                'span.note:before {content:url(images/note.png); padding-left: 5px;}' +
-                '.command, .filename, .keycap, .classname, .literal {font-family:"liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight:bold;}' +
-                '.guibutton, .guilabel {font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace; font-weight: bold;}'
-            ),
-            object_resizing: "img,table,sup.footnote",
-            file_browser_callback: function(field_name, url, type, win)
-            {
-                current_file_browser_window = win;
-                if (type == "image")
-                {
-                    alert("browse_image:" + field_name + ":" + url);
-                }
-            },
-            style_formats: [
-                {title: _("command"), inline: "span", classes: "command", attributes: {"data-docbook-type": "command"}},
-                {title: _("guibutton"), inline: "span", classes: "guibutton", attributes: {"data-docbook-type": "guibutton"}},
-                {title: _("guilabel"), inline: "span", classes: "guilabel", attributes: {"data-docbook-type": "guilabel"}},
-                {title: _("guimenu"), inline: "span", classes: "guimenu", attributes: {"data-docbook-type": "guimenu"}},
-                {title: _("guimenuitem"), inline: "span", classes: "guimenuitem", attributes: {"data-docbook-type": "guimenuitem"}},
-                {title: _("guisubmenu"), inline: "span", classes: "guisubmenu", attributes: {"data-docbook-type": "guisubmenu"}},
-                {title: _("keycap"), inline: "span", classes: "keycap", attributes: {"data-docbook-type": "keycap"}},
-                {title: _("keycombo"), inline: "span", classes: "keycombo", attributes: {"data-docbook-type": "keycombo"}},
-                {title: _("note"), inline: "span", classes: "note", attributes: {"data-docbook-type": "note"}},
-                {title: _("replaceable"), inline: "span", classes: "replaceable", attributes: {"data-docbook-type": "replaceable"}},
-                {title: _("wordasword"), inline: "span", classes: "wordasword", attributes: {"data-docbook-type": "wordasword"}}
-            ]
-        });
+                break;
+        }
         
         source_editor = CodeMirror.fromTextArea(document.getElementById("source_editor"),
         {
