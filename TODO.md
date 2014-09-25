@@ -18,3 +18,5 @@ Add missing css styles for docbook-specific objects in TinyMCE
 Generate list of docbook-specific objects from python
 
 Fix handling of notes (when they contain <para>)
+
+Content not loaded in ckeditor on first load
